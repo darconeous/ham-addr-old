@@ -1,0 +1,107 @@
+#!/bin/sh
+#
+# 2015-10-30
+#
+# This file was written by Robert Quattlebaum <darco@deepdarc.com>.
+#
+# This work is provided as-is. Unless otherwise provided in writing,
+# Robert Quattlebaum makes no representations or warranties of any
+# kind concerning this work, express, implied, statutory or otherwise,
+# including without limitation warranties of title, merchantability,
+# fitness for a particular purpose, non infringement, or the absence
+# of latent or other defects, accuracy, or the present or absence of
+# errors, whether or not discoverable, all to the greatest extent
+# permissible under applicable law.
+#
+# To the extent possible under law, Robert Quattlebaum has waived all
+# copyright and related or neighboring rights to this work. This work
+# is published from the United States.
+#
+# I, Robert Quattlebaum, dedicate any and all copyright interest in
+# this work to the public domain. I make this dedication for the
+# benefit of the public at large and to the detriment of my heirs and
+# successors. I intend this dedication to be an overt act of
+# relinquishment in perpetuity of all present and future rights to
+# this code under copyright law. In jurisdictions where this is not
+# possible, I hereby release this code under the Creative Commons
+# Zero (CC0) license.
+#
+#  * <http://creativecommons.org/publicdomain/zero/1.0/>
+#
+
+echon() {
+#	echo -n "$@"
+	printf %s "$*"
+}
+
+HAMADDR=$(echon "${1-$(cat)}" | sed 's/[^a-fA-F0-9]//g')
+
+hamindex_to_char () {
+	case ${1} in
+		0) echo "?" ;;
+		
+		1) echo "A" ;;
+		2) echo "B" ;;
+		3) echo "C" ;;
+		4) echo "D" ;;
+		5) echo "E" ;;
+		6) echo "F" ;;
+		7) echo "G" ;;
+		8) echo "H" ;;
+		9) echo "I" ;;
+		10) echo "J" ;;
+		11) echo "K" ;;
+		12) echo "L" ;;
+		13) echo "M" ;;
+		14) echo "N" ;;
+		15) echo "O" ;;
+		16) echo "P" ;;
+		17) echo "Q" ;;
+		18) echo "R" ;;
+		19) echo "S" ;;
+		20) echo "T" ;;
+		21) echo "U" ;;
+		22) echo "V" ;;
+		23) echo "W" ;;
+		24) echo "X" ;;
+		25) echo "Y" ;;
+		26) echo "Z" ;;
+		
+		27) echo "0" ;;
+		28) echo "1" ;;
+		29) echo "2" ;;
+		30) echo "3" ;;
+		31) echo "4" ;;
+		32) echo "5" ;;
+		33) echo "6" ;;
+		34) echo "7" ;;
+		35) echo "8" ;;
+		36) echo "9" ;;
+		
+		37) echo "/" ;;
+		38) echo "-" ;;
+		
+		39) echo '^' ;;
+	esac
+}
+
+
+chunk_to_triplet () {
+	local i=$1
+	echon "$(hamindex_to_char $(( (i/1600)%40 )) )"
+	echon "$(hamindex_to_char $(( (i/40)%40 )) )"
+	echon "$(hamindex_to_char $(( i%40 )) )"
+}
+
+HAMADDRSTR=
+
+while [ ${#HAMADDR} != 0 ]
+do
+	chunk=0x${HAMADDR:0:4}
+	while [ ${#chunk} != 6 ] ; do chunk="${chunk}0" ; done
+	HAMADDRSTR="${HAMADDRSTR}$(chunk_to_triplet $chunk)"
+	HAMADDR="${HAMADDR:4}"
+done
+
+echo $HAMADDRSTR | sed 's/?*$//'
+

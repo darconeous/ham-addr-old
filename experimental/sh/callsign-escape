@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# 2015-10-30
+#
+# This file was written by Robert Quattlebaum <darco@deepdarc.com>.
+#
+# This work is provided as-is. Unless otherwise provided in writing,
+# Robert Quattlebaum makes no representations or warranties of any
+# kind concerning this work, express, implied, statutory or otherwise,
+# including without limitation warranties of title, merchantability,
+# fitness for a particular purpose, non infringement, or the absence
+# of latent or other defects, accuracy, or the present or absence of
+# errors, whether or not discoverable, all to the greatest extent
+# permissible under applicable law.
+#
+# To the extent possible under law, Robert Quattlebaum has waived all
+# copyright and related or neighboring rights to this work. This work
+# is published from the United States.
+#
+# I, Robert Quattlebaum, dedicate any and all copyright interest in
+# this work to the public domain. I make this dedication for the
+# benefit of the public at large and to the detriment of my heirs and
+# successors. I intend this dedication to be an overt act of
+# relinquishment in perpetuity of all present and future rights to
+# this code under copyright law. In jurisdictions where this is not
+# possible, I hereby release this code under the Creative Commons
+# Zero (CC0) license.
+#
+#  * <http://creativecommons.org/publicdomain/zero/1.0/>
+#
+
+echon() {
+#	echo -n "$@"
+	printf %s "$*"
+}
+
+CALLSIGN=${1-$(xargs)}
+CALLSIGN=$(echon "$CALLSIGN" | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/')
+
+CALLSIGN_ID=$(echon "${CALLSIGN}" | sed -E 's/-?[0-9]*$//')
+CALLSIGN_INDI=$(echon "${CALLSIGN_ID}" | sed -E 's/^[^/]*$// ; s:.*(/[^/]*)$:\1:;')
+CALLSIGN_ID=$(echon "${CALLSIGN_ID}" | sed -E 's:(.*)/.*$:\1:')
+CALLSIGN_TNUM=$(($(echon "${CALLSIGN}" | sed -E 's/.*([^0-9]|-)([0-9]*)$/\2/;s/^$/0/;')))
+
+escape_characters() {
+	local value=${1-$(xargs)}
+	echon "$value" | sed '
+		s/_/^A/g;
+		s/\./^B/g;
+		s/|/^C/g;
+		s/:/^D/g;
+	'
+}
+
+# Escape the indicator
+CALLSIGN_INDI=$(echon "${CALLSIGN_INDI}" | sed -E '
+	s:^/M$:^M:; s:^/MOBILE$:^M:;
+	s:^/RPTR$:^R:; s:^/REPEATER$:^R:;
+	s:^/MM$:^S:;
+	s:^/AM$:^F:;
+	s:^/P$:^P:; s:^/PORTABLE$:^P:;
+')
+
+CALLSIGN_NEW="$(escape_characters "${CALLSIGN_ID}${CALLSIGN_INDI}${CALLSIGN_TNUM}" | sed 's/\(.*\)-0/\1/')"
+CALLSIGN="$(escape_characters "${CALLSIGN}")"
+
+if [ ${#CALLSIGN_NEW} -lt ${#CALLSIGN} ]
+then echo "${CALLSIGN_NEW}"
+else echo "${CALLSIGN}"
+fi
