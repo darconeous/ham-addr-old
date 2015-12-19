@@ -107,26 +107,25 @@ No. | Char | No. | Char | No. | Char | No. | Char
 8   | `H`  | 18  | `R`  | 28  | `1`  | 38  | `-`
 9   | `I`  | 19  | `S`  | 29  | `2`  | 39  | ESC
 
-Where *NUL* is analogous to the ascii *NUL* character, and *ESC* is
+Where *NUL* is analogous to the ASCII *NUL* character, and *ESC* is
 reserved for future use with a currently undefined and experimental
 character escaping mechanism. (Should be rendered as `^`)
 
-## 4. Ham-Address Chunk Encoding ##
+## 4. 16-Bit Chunk Encoding ##
 
-The address is encoded in to four 16-bit big-endian "chunks", which
-can contain up to three characters each. Each chunk is encoded as
-follows:
+Using the above character set, we can store three characters as a single
+integer that fits nicely within a 16-bit integer using the encoding:
 
     S = CHAR[0] * 1600 + CHAR[1] * 40 + CHAR[2]
 
-... and decoded as:
+Where `CHAR[0]` is the leftmost character and `CHAR[2]` is the
+rightmost character in the "chunk".
+
+We can then decode the original characters by reversing that process:
 
     CHAR[0] = S / 1600 MOD 40
     CHAR[1] = S / 40 MOD 40
     CHAR[2] = S MOD 40
-
-Where `CHAR[0]` is the leftmost character and `CHAR[2]` is the
-rightmost character in the "chunk".
 
 When encoding a chunk that uses less than three characters, you would
 set `CHAR[2]` and/or `CHAR[1]` (as appropriate) to the value 0
@@ -135,10 +134,13 @@ position.
 
 ## 5. HAM-64 Address Format ##
 
-Proper addresses are 64-bits long, allowing for long, complex
-callsigns.
-
+HAM-64 addresses are encoded as up to four 16-bit big-endian "chunks",
+which can contain up to three characters in each chunk. Proper
+addresses are 64-bits long, allowing for long, complex callsigns.
 Chunks are always stored in big-endian order.
+
+When writing out a HAM-64 address, each chunk is shown as a four-digit
+hexidecimal number, with each chunk separated by a colon `:`.
 
 Lets have a look at a relatively short callsign, *N6DRC*:
 
@@ -179,11 +181,10 @@ addresses using addresses of the format `FAxx:xxxx:xxxx:xxxx`, where
 group-id.
 
 For converting IPv6 multicast addresses into link-local multicast
-addresses, you actually store the lower 13 octets of the multicast
-group-id *in reverse order*. This takes advantage of the fact that
-IPv6 multicast addresses tend to be zero-filled. For example, a
-multicast address of `ff02::1` would simply be the abbreviated ham
-address `FA01`.
+addresses, you store the lower 13 octets of the multicast group-id *in
+reverse order*. This takes advantage of the fact that IPv6 multicast
+addresses tend to be zero-filled. For example, a multicast address of
+`ff02::1` would simply be the abbreviated ham address `FA01`.
 
 ### 6.3 IPv4 Multicast ###
 
