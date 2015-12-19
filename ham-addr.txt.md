@@ -94,46 +94,22 @@ out into a full addressing specification by defining the following:
 The address format stores each character as a number in base-40. The
 character set is defined below:
 
- *  0: *NULL* (Empty)
- *  1: `A`
- *  2: `B`
- *  3: `C`
- *  4: `D`
- *  5: `E`
- *  6: `F`
- *  7: `G`
- *  8: `H`
- *  9: `I`
- *  10: `J`
- *  11: `K`
- *  12: `L`
- *  13: `M`
- *  14: `N`
- *  15: `O`
- *  16: `P`
- *  17: `Q`
- *  18: `R`
- *  19: `S`
- *  20: `T`
- *  21: `U`
- *  22: `V`
- *  23: `W`
- *  24: `X`
- *  25: `Y`
- *  26: `Z`
- *  27: `0`
- *  28: `1`
- *  29: `2`
- *  30: `3`
- *  31: `4`
- *  32: `5`
- *  33: `6`
- *  34: `7`
- *  35: `8`
- *  36: `9`
- *  37: `/` ("Stroke", used by indicator suffixes/prefixes)
- *  38: `-` (Dash, occasionally seen in packet radio)
- *  39: *ESC* (Escape code, printed as `^`)
+No. | Char | No. | Char | No. | Char | No. | Char
+----|------|-----|------|-----|------|-----|------
+0   | NUL  | 10  | `J`  | 20  | `T`  | 30  | `3`
+1   | `A`  | 11  | `K`  | 21  | `U`  | 31  | `4`
+2   | `B`  | 12  | `L`  | 22  | `V`  | 32  | `5`
+3   | `C`  | 13  | `M`  | 23  | `W`  | 33  | `6`
+4   | `D`  | 14  | `N`  | 24  | `X`  | 34  | `7`
+5   | `E`  | 15  | `O`  | 25  | `Y`  | 35  | `8`
+6   | `F`  | 16  | `P`  | 26  | `Z`  | 36  | `9`
+7   | `G`  | 17  | `Q`  | 27  | `0`  | 37  | `/`
+8   | `H`  | 18  | `R`  | 28  | `1`  | 38  | `-`
+9   | `I`  | 19  | `S`  | 29  | `2`  | 39  | ESC
+
+Where *NUL* is analogous to the ascii *NUL* character, and *ESC* is
+reserved for future use with a currently undefined and experimental
+character escaping mechanism. (Should be rendered as `^`)
 
 ## 4. Ham-Address Chunk Encoding ##
 
@@ -157,12 +133,12 @@ set `CHAR[2]` and/or `CHAR[1]` (as appropriate) to the value 0
 (*NULL*), indicating that there is not a character present in that
 position.
 
+## 5. HAM-64 Address Format ##
+
 Proper addresses are 64-bits long, allowing for long, complex
 callsigns.
 
 Chunks are always stored in big-endian order.
-
-## 5 Ham-address encoding example ##
 
 Lets have a look at a relatively short callsign, *N6DRC*:
 
@@ -182,7 +158,7 @@ The process is identical for large callsigns, like `VI2BMARC50`:
 Thus, the ham address for this callsign is `8B05:0E89:7118:A8C0`.
 Since it is so long, there is no shorter representation.
 
-## 6. Special Ham Addresses ##
+## 6. Special HAM-64 Addresses ##
 
 All addresses larger than `F9FF:...` are special addresses, and do not
 have a callsign representation. These values are used for multicast
