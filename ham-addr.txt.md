@@ -7,8 +7,8 @@ Last Updated 2015-12-19
 
 ## 0. Abstract ##
 
-This document is a specification for efficiently and reversably
-encoding radio callsigns into numberic identifiers, which may then be
+This document is a specification for efficiently and reversibly
+encoding radio callsigns into numeric identifiers, which may then be
 used as addresses for packet radio or other purposes. Additionally,
 this document also describes a way to encode a callsign into an EUI-48
 and EUI-64 address using similar methods, containing up to 8 and 11
@@ -48,7 +48,7 @@ any purpose, public or private, commercial or non-commercial.
 ## 2. Introduction ##
 
 Radio callsigns are generally assigned to individuals or organizations
-for indentification purposes by the local regulatory agency(The FCC
+for identification purposes by the local regulatory agency(The FCC
 in the US).
 
 The longest callsign that can currently be assigned to an individual
@@ -140,7 +140,7 @@ addresses are 64-bits long, allowing for long, complex callsigns.
 Chunks are always stored in big-endian order.
 
 When writing out a HAM-64 address, each chunk is shown as a four-digit
-hexidecimal number, with each chunk separated by a colon `:`.
+hexadecimal number, with each chunk separated by a colon `:`.
 
 Lets have a look at a relatively short callsign, *N6DRC*:
 
@@ -196,7 +196,7 @@ the byte values for the last three octets of the IPv4 multicast address.
 
 Sometimes it is useful to encode a callsign in an EUI-48 or EUI-64
 address. This can be useful when operating standard Wi-Fi or 802.15.4
-equipment under section 97 rules. While it is mathmatically impossible
+equipment under section 97 rules. While it is mathematically impossible
 to encode every 64-bit ham address as either an EUI-48 or an EUI-64, a
 significant subset of addresses can be encoded.
 
@@ -245,7 +245,7 @@ Where:
  *  `B` is the 16-bit ham address encoding of the fourth, fifth, and
     sixth characters of the callsign. Valid values are between
     `0x0000` and `0xFA00`
- *  `C` is the most-signiticant 13-bits of the 16-bit ham address
+ *  `C` is the most-significant 13-bits of the 16-bit ham address
     encoding of the seventh and eighth characters of the callsign. The
     least-significant three bits are always assumed to be zero. Note
     that octet 1 contains bits 7 thru 3 and octet 6 contains bits 15
@@ -290,7 +290,7 @@ Where:
  *  `C` is the 16-bit ham address encoding of the seventh, eighth, and
     ninth characters of the callsign. Valid values are between
     `0x0000` and `0xFA00`
- *  `D` is the most-signiticant 13-bits of the 16-bit ham address
+ *  `D` is the most-significant 13-bits of the 16-bit ham address
     encoding of the tenth and eleventh characters of the callsign. The
     least-significant three bits are always assumed to be zero. Note
     that octet 1 contains bits 7 thru 3 and octet 6 contains bits 15
