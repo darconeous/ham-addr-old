@@ -65,10 +65,10 @@ limited character set to our advantage.
 
 It turns out that if we limit ourselves to fewer than 40 different
 possible symbols, we can store up to three characters in a 16-bit
-block. Thus, we can store a 6-digit callsign in just 32 bits, a 9
-character callsign in 48 bits and a 12 character callsign in 64. 12
-characters is plenty of space for both a callsign *and* an indicator
-suffix/prefix.
+block. Thus, we can store a six character callsign in just 32 bits, a
+nine character callsign in 48 bits and a twelve character callsign in
+64. 12 characters is plenty of space for both a callsign *and* an
+indicator suffix/prefix.
 
 This document takes the basic premise described above and fleshes it
 out into a full addressing specification by defining the following:
@@ -95,8 +95,8 @@ The address format stores each character as a number in base-40. The
 character set is defined below:
 
 No. | Char | No. | Char | No. | Char | No. | Char
-----|------|-----|------|-----|------|-----|------
-0   | NUL  | 10  | `J`  | 20  | `T`  | 30  | `3`
+:--:|:----:|:---:|:----:|:---:|:----:|:---:|:----:
+0   | *NUL*| 10  | `J`  | 20  | `T`  | 30  | `3`
 1   | `A`  | 11  | `K`  | 21  | `U`  | 31  | `4`
 2   | `B`  | 12  | `L`  | 22  | `V`  | 32  | `5`
 3   | `C`  | 13  | `M`  | 23  | `W`  | 33  | `6`
@@ -105,7 +105,7 @@ No. | Char | No. | Char | No. | Char | No. | Char
 6   | `F`  | 16  | `P`  | 26  | `Z`  | 36  | `9`
 7   | `G`  | 17  | `Q`  | 27  | `0`  | 37  | `/`
 8   | `H`  | 18  | `R`  | 28  | `1`  | 38  | `-`
-9   | `I`  | 19  | `S`  | 29  | `2`  | 39  | ESC
+9   | `I`  | 19  | `S`  | 29  | `2`  | 39  | *ESC*
 
 Where *NUL* is analogous to the ASCII *NUL* character, and *ESC* is
 reserved for future use with a currently undefined and experimental
