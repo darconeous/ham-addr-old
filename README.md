@@ -8,11 +8,16 @@ way for efficiently and reversably encoding radio callsigns into
 numberic identifiers, which may then be used as addresses for packet
 radio or other purposes.
 
+Click on [this link](https://rawgit.com/darconeous/ham-addr/master/n6drc-arnce.html)
+to view the most recent HTML version of the specification.
+
 The original source of the specification is in the file [`n6drc-arnce.md`](n6drc-arnce.md),
 which is formatted in [mmark syntax](https://github.com/miekg/mmark/wiki/Syntax) (vaguely
 similar to [GitHub-flavored Markdown](https://help.github.com/articles/basic-writing-and-formatting-syntax/)).
 The included makefile uses [paulej's rfctools](https://github.com/paulej/rfctools) to
 convert this base format into text, HTML, and XML formats.
+
+This project is hosted on GitHub as [darconeous/ham-addr](https://github.com/darconeous/ham-addr).
 
 ## Reference Implementations ##
 
