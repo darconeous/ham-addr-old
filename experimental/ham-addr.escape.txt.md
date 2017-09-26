@@ -13,18 +13,18 @@ character may be used with one of the following values in order to
 compactly encode the associated string:
 
  *  Characters
-     *  ESC + 0 : `?` (Really undefined, but displayed as `?`)
-     *  ESC + `A` : `_` (Underscore)
-     *  ESC + `B` : `.` (Dot)
-     *  ESC + `C` : `|` (Pipe)
-     *  ESC + `D` : `:` (Colon)
+     *  ESC + `/` : `:` (Colon)
+     *  ESC + `-` : `_` (Underscore)
+     *  ESC + `D` : `.` (Dot)
+     *  ESC + `V` : `|` (Pipe)
  *  Indicator Suffix
-     *  ESC + `R` : Repeater Indicator, rendered as `/R` or `/R-`
-     *  ESC + `P` : Portable Indicator, rendered as `/P` or `/P-`
-     *  ESC + `M` : Mobile Indicator, rendered as `/M` or `/M-`
-     *  ESC + `S` : Maritime Mobile Indicator, rendered as `/MM` or
-        `/MM-`
-     *  ESC + `F` : Aeronautical Mobile Indicator, `/AM` or `/AM-`
+     *  ESC + `R` : Repeater Indicator, rendered as `/RPTR` or `/RPTR-`
+     *  ESC + `P` : Portable Indicator, rendered as `/PORT` or `/PORT-`
+     *  ESC + `M` : Mobile Indicator, rendered as `/MOBI` or `/MOBI-`
+     *  ESC + `S` : Maritime Mobile Indicator, rendered as `/MARI` or
+        `/MARI-`
+     *  ESC + `A` : Aeronautical Mobile Indicator, `/AIRM` or `/AIRM-`
+	 *  ESC + `C` : Contest Indicator, rendered as `/CTST` or `/CTST-`
 
 All other escape pairings are currently undefined and should be
 considered *reserved* for future use. If a decoder encounters an
