@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd' []>
-<rfc ipr="none" category="std" docName="n6drc-arnce-1">
+<rfc ipr="none" category="std" docName="n6drc-arnce-1-bis">
 <?rfc toc="yes"?>
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes"?>
@@ -12,7 +12,7 @@
 <front>
 <title abbrev="N6DRC ARNCE (Ham Address)">Amateur Radio Numeric Callsign Encoding</title>
 
-<author initials="R." surname="Quattlebaum" fullname="Robert S. Quattlebaum (N6DRC)">
+<author role="editor" initials="R." surname="Quattlebaum" fullname="Robert S. Quattlebaum (N6DRC)">
 <organization>Individual</organization>
 <address>
 <postal>
@@ -27,7 +27,7 @@
 <uri></uri>
 </address>
 </author>
-<date year="2015" month="December" day="19"/>
+<date year="2017" month="September" day="25"/>
 
 <area>Internet</area>
 <workgroup></workgroup>
@@ -41,22 +41,25 @@
 
 
 <abstract>
-<t>This document is a specification for efficiently and reversibly
-encoding radio callsigns into numeric identifiers, which may then be
-used as addresses for packet radio or other purposes. Additionally,
-this document also describes a way to encode a callsign into an EUI-48
-and EUI-64 address using similar methods, containing up to 8 and 11
-characters, respectively.
+<t>This document describes a mechanism for efficiently and reversibly
+encoding radio callsigns into compact numeric identifiers. It also
+defines two addressing mechanisms using this numeric encoding: A new
+adaptive link-layer addressing scheme (HAM-64) intended for use with
+new link-layer networking protocols like ARNGLL (Up to 12 characters),
+and an adaptation of EUI-48 and EUI-64 addresses (Up to 8 and 11
+characters, respectively) intended for use with existing link layer
+protocols.
 </t>
-<t>While this addressing scheme was developed for amateur radio purposes,
-there is no particular reason why it could not be adapted for use with
-other radio services that make use of callsigns.
+<t>While this callsign encoding/addressing schemes was developed for
+amateur radio purposes, there is no technical reason why it could not
+be used directly with other radio services that make use of ITU
+callsigns.
 </t>
 </abstract>
 
 
 <note title="Copyright Notice">
-<t>Copyright (C) 2015 Robert Quattlebaum. All rights reserved.
+<t>Copyright (C) 2017 Robert Quattlebaum. All rights reserved.
 </t>
 <t>This use of this document is hereby granted under the terms of the
 Creative Commons International Attribution 4.0 Public License, as
@@ -94,15 +97,26 @@ any purpose, public or private, commercial or non-commercial.
 <middle>
 
 <section anchor="introduction" title="Introduction">
-<t>Radio callsigns are generally assigned to individuals or organizations
-for identification purposes by the local regulatory agency(The FCC
-in the US).
+<t>Radio callsigns are used to identify the source (and possibly the
+destination) of licensed radio transmissions. Radio callsigns are
+generally assigned to individuals or organizations for identification
+purposes by the local regulatory authority, such as the FCC in the
+United States.
 </t>
-<t>The longest callsign that can currently be assigned to an individual
-is six characters long. If we naively encode each character using
-ASCII, the largest callsign would be 48 bits long. However, if we
-encoded each character using just six bits, this would make the
-address 36 bits large. An improvement, but we can do better!
+<t>Their presence in transmissions is often mandated by regulations,
+which works well for voice and constant-wave (CW or morse-code) modes,
+but doesn't work well for packet radio. AX.25, for example, imposes a
+hard 6-character limit on callsign length. The longest callsign that
+can currently be assigned to an individual is seven characters long,
+which means that operators which are assigned seven-character
+callsigns cannot legally use AX.25. Additionally, the callsign is
+encoded as plain ASCII text, which is hardly the most compact
+encoding.
+</t>
+<t>Naively encoding a six-character callsign using ASCII requires at
+least 48 bits. However if we encoded each character using just six
+bits, this would make a six-character callsign take up only 36 bits.
+This is certainly an improvement, but we can still do better.
 </t>
 <t>Callsigns exclusively consist of a collection of letters (A thru Z)
 and numeric digits (0 thru 9). There are also secondary suffixes which
@@ -114,31 +128,32 @@ limited character set to our advantage.
 possible symbols, we can store up to three characters in a 16-bit
 block. Thus, we can store a six character callsign in just 32 bits, a
 nine character callsign in 48 bits and a twelve character callsign in
-64. 12 characters is plenty of space for both a callsign <spanx style="emph">and</spanx> an
+64 bits. 12 characters is plenty of space for both a callsign <spanx style="emph">and</spanx> an
 indicator suffix/prefix.
 </t>
 <t>This document takes the basic premise described above and fleshes it
-out into a full addressing specification by defining the following:
+out into a full addressing specification by fully defining the
+following:
 </t>
 <t>
 <list style="symbols">
-<t>A base-40 character set, optimized for encoding radio callsigns</t>
-<t>A method to encode three base-40 values (three callsign
+<t>A base-40 character set optimized for encoding ITU radio callsigns</t>
+<t>A method for encoding three base-40 values (three callsign
 characters) within a 16-bit (two-byte) integer</t>
-<t>A 64-bit address format ('HAM-64') for encoding callsigns up to 12
-characters into a 64-bit address for use with link-layer packet
-radio protocols</t>
-<t>A method for encoding callsigns up to 8 characters long in an
-EUI-48 address</t>
-<t>A method for encoding callsigns up to 11 characters long in an
-EUI-64 address</t>
+<t>A new 64-bit addressing format ('HAM-64') intended for use with
+with new link-layer packet radio protocols; capable of encoding
+callsigns up to 12 characters long</t>
+<t>EUI-48 and EUI-64 callsign encodings intended for use with
+existing link-layer protocols; capable of encoding callsigns up to
+8 and 11 characters long</t>
 </list>
 </t>
 </section>
 
 <section anchor="base40-character-set" title="Base-40 Character Set">
-<t>The address format stores each character as a number in base-40. The
-character set is defined below:
+<t>Since there are a limited number of valid characters in an ITU radio
+callsign, we represent each character in a callsign as number in
+base-40. The character set we are using for this document defined below:
 </t>
 <texttable>
 <ttcol align="center">No.</ttcol>
@@ -165,18 +180,22 @@ character set is defined below:
 reserved for future use with a currently undefined and experimental
 character escaping mechanism. (Should be rendered as <spanx style="verb">^</spanx>)
 </t>
+<t>While this character set was designed specifically for use with the
+16-bit chunk encoding defined in the next section, it is possible
+that this character set could be useful for other purposes.
+</t>
 </section>
 
 <section anchor="chunk-encoding" title="16-Bit Chunk Encoding">
-<t>Using the above character set, we can store three characters as a single
-integer that fits nicely within a 16-bit integer using the encoding:
+<t>Using the previously defined character set, we can store three characters
+as a single integer that fits within a 16-bit integer using the encoding:
 </t>
 
 <figure align="center"><artwork align="center">
 S = CHAR[0] * 1600 + CHAR[1] * 40 + CHAR[2]
 </artwork></figure>
-<t>Where <spanx style="verb">CHAR[0]</spanx> is the leftmost character and <spanx style="verb">CHAR[2]</spanx> is the
-rightmost character in the &quot;chunk&quot;.
+<t>Where <spanx style="verb">CHAR[0]</spanx> is the first (leftmost) character and <spanx style="verb">CHAR[2]</spanx> is the
+last (rightmost) character in the &quot;chunk&quot;.
 </t>
 <t>We can then decode the original characters by reversing that process:
 </t>
@@ -191,13 +210,41 @@ set <spanx style="verb">CHAR[2]</spanx> and/or <spanx style="verb">CHAR[1]</span
 (<spanx style="emph">NUL</spanx>), indicating that there is not a character present in that
 position.
 </t>
+<t>The maximum valid value using this three-character 16-bit encoding is
+0xF9FF. Any 16-bit value larger than 0xF9FF MUST NOT be decoded
+using the above mechanism. The such values MAY be used to indicate
+other conditions, or simply be treated as invalid. For example, the
+HAM-64 address format uses values larger than 0xF9FF in the first
+chunk as a way to indicate that the address is a special address.
+</t>
+<t>To encode callsigns longer than six characters, multiple 16-bit chunks
+are concatenated.
+</t>
+<t>While this 16-bit base-40 encoding mechanism was designed specifically
+for use with the HAM-64 address format defined in the next section, it
+is possible that this encoding could be useful for other purposes.
+</t>
 </section>
 
 <section anchor="ham64-address-format" title="HAM-64 Address Format">
-<t>HAM-64 addresses are encoded as up to four 16-bit big-endian &quot;chunks&quot;,
-which can contain up to three characters in each chunk. Proper
-addresses are 64-bits long, allowing for long, complex callsigns.
-Chunks are always stored in big-endian order.
+<t>HAM-64 is a new link-layer addressing format, similar in purpose to
+the ubiquitous EUI-48 and EUI-64 address standards. It was specifically
+designed for compactness and encoding clarity. It's features include:
+</t>
+<t>
+<list style="symbols">
+<t>Encodes callsigns up to 12 characters long, allowing for long
+complex callsigns</t>
+<t>Variable length encoding, allowing for 16-bit, 32-bit, 48-bit, and
+64-bit representations of 3, 6, 9, and 12 character callsigns</t>
+<t>Broadcast and multicast address support</t>
+</list>
+</t>
+
+<section anchor="address-construction" title="Address Construction">
+<t>HAM-64 addresses are encoded as four 16-bit big-endian &quot;chunks&quot;,
+which can contain up to three characters in each chunk. Chunks are
+always stored in big-endian order.
 </t>
 <t>When writing out a HAM-64 address, each chunk is shown as a four-digit
 hexadecimal number, with each chunk separated by a colon <spanx style="verb">:</spanx>.
@@ -210,8 +257,11 @@ hexadecimal number, with each chunk separated by a colon <spanx style="verb">:</
 <t><spanx style="verb">RC</spanx> encodes to <spanx style="verb">0x70F8</spanx></t>
 </list>
 </t>
-<t>Thus, the full ham address for this callsign is <spanx style="verb">5CAC:70F8:0000:0000</spanx>,
-or just <spanx style="verb">5CAC:70F8</spanx> for short.
+<t>Thus, the full ham address for this callsign is <spanx style="verb">5CAC:70F8:0000:0000</spanx>.
+</t>
+<t>By convention, all trailing chunks with the value <spanx style="verb">0x0000</spanx> are omitted
+for brevity. Because the HAM-64 encoding of <spanx style="verb">N6DRC</spanx> has two trailing
+zero chunks, <spanx style="verb">5CAC:70F8</spanx> is the preferred notation.
 </t>
 <t>The process is identical for large callsigns, like <spanx style="verb">VI2BMARC50</spanx>:
 </t>
@@ -228,8 +278,20 @@ Since it is so long, there is no shorter representation.
 </t>
 </section>
 
+<section anchor="adaptive-address-size" title="Adaptive Address Size">
+<t>Since few amateur radio callsigns are longer than six characters, it
+is expected that link-layer protocols using HAM-64 will want to
+take the notation convention mentioned above to heart. By including
+the source and destination address sizes in the link-layer header,
+it is possible to omit all trailing zero-valued chunks from
+header. This allows for common callsign lengths to be compactly
+encoded without sacrificing the flexibility of using a longer
+callsign when necessary.
+</t>
+</section>
+
 <section anchor="special-ham64-addresses" title="Special HAM-64 Addresses">
-<t>All addresses larger than <spanx style="verb">F9FF:...</spanx> are special addresses, and do not
+<t>All addresses larger than <spanx style="verb">F9FF:...</spanx> are special addresses, that do not
 have a callsign representation. These values are used for multicast
 and broadcast for link layers that use ham addresses natively. All
 values and ranges which are not explicitly defined below are to be
@@ -248,36 +310,39 @@ IPv6 multicast MUST be implemented using addresses of the format
 <spanx style="verb">FAxx:xxxx:xxxx:xxxx</spanx>, where <spanx style="verb">x</spanx> represents a special <spanx style="emph">reversed</spanx>
 representation (defined below) of the IPv6 group-id.
 </t>
-<t>For converting IPv6 multicast addresses into link-local HAM-64 multicast
-addresses, you MUST store the lower 13 octets of the multicast group-id <spanx style="emph">in
-reverse order</spanx>. This takes advantage of the fact that IPv6 multicast
-addresses tend to be zero-filled, allowing for compact HAM-64 address
-representations. For example, a multicast address of <spanx style="verb">ff02::1</spanx> would
-simply be the abbreviated ham address <spanx style="verb">FA01</spanx>.
+<t>For converting IPv6 multicast addresses into link-local HAM-64
+multicast addresses, you MUST store the lower 13 octets of the
+multicast group-id <spanx style="emph">in reverse order</spanx>. This takes advantage of the
+fact that IPv6 multicast addresses tend to be zero-filled, allowing
+for compact HAM-64 address representations. For example, a multicast
+address of <spanx style="verb">ff02::1</spanx> would simply be the abbreviated ham address
+<spanx style="verb">FA01</spanx>.
 </t>
 </section>
 
 <section anchor="ipv4-multicast" title="IPv4 Multicast">
-<t>IPv4 multicast can be implemented for link-layers using HAM-64 addresses
-using addresses of the format <spanx style="verb">FBxx:xxxx:0000:0000</spanx>, where <spanx style="verb">x</spanx> represents
-the byte values for the last three octets of the IPv4 multicast address.
+<t>IPv4 multicast can be implemented for link-layers using HAM-64
+addresses using addresses of the format <spanx style="verb">FBxx:xxxx:0000:0000</spanx>, where
+<spanx style="verb">x</spanx> represents the byte values for the last three octets of the IPv4
+multicast address.
 </t>
+</section>
 </section>
 </section>
 
 <section anchor="eui48-and-eui64-encoding" title="EUI-48 and EUI-64 Encoding">
 <t>Sometimes it is useful to encode a callsign in an EUI-48 or EUI-64
 address. This can be useful when operating standard Wi-Fi or 802.15.4
-equipment under section 97 rules. While it is mathematically impossible
-to encode every 64-bit ham address as either an EUI-48 or an EUI-64, a
-significant subset of addresses can be encoded.
+equipment under section 97 rules. While it is mathematically
+impossible to encode every HAM-64 address as either an EUI-48 or an
+EUI-64, a significant subset of addresses can be encoded.
 </t>
 <t>One of the goals of this encoding is to allow fast translation between
 a &quot;ham-address&quot; and its associated EUI-64 or EUI-48---specifically, no
 multiplication or division is required. Thus, 61 of the total 64-bits
 have a direct one-to-one representation in an EUI-64 representation,
 with the last three bits assumed to be zero (which they will be if the
-last character is <spanx style="emph">NULL</spanx>).
+last character is <spanx style="emph">NUL</spanx>).
 </t>
 <t>The basic algorithm for encoding works like this:
 </t>
