@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # 2015-10-30
 #
@@ -42,6 +42,13 @@ then MACADDR="${MACADDR:0:6}${MACADDR:10}"
 fi
 
 last_byte=0x${MACADDR:0:2}
+first_chunk=0x${MACADDR:2:4}
+
+if [ $((last_byte&0x07)) -ne 2 ] ||
+   [ $((first_chunk)) -lt $((0x0640)) ] ||
+   [ $((first_chunk)) -gt $((0xF9FF)) ]
+then echo "$0: Not a ham-addr" 1>&2 ; exit 1
+fi
 
 MACADDR=${MACADDR:2}`printf %02X $((last_byte&0xF8))`
 

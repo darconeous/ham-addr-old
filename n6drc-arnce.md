@@ -1,8 +1,8 @@
 %%%
     title = "Amateur Radio Numeric Callsign Encoding"
-    abbrev = "N6DRC ARNCE (Ham Address)"
+    abbrev = "N6DRC ARNCE (ham-addr)"
     category = "std"
-    docName = "n6drc-arnce-1-bis"
+    docName = "n6drc-arnce-2"
     ipr = "none"
     keyword = ["Ham Address", "EUI-48", "EUI-64", "Link Local", "Callsign", "Amateur Radio", "Ham Radio"]
 
@@ -141,7 +141,7 @@ No. | Char | No. | Char | No. | Char | No. | Char
 6   | `F`  | 16  | `P`  | 26  | `Z`  | 36  | `9`
 7   | `G`  | 17  | `Q`  | 27  | `0`  | 37  | `/`
 8   | `H`  | 18  | `R`  | 28  | `1`  | 38  | `-`
-9   | `I`  | 19  | `S`  | 29  | `2`  | 39  | *ESC*
+9   | `I`  | 19  | `S`  | 29  | `2`  | 39  | *ESC*/`^`
 
 Where *NUL* is analogous to the ASCII *NUL* character, and *ESC* is
 reserved for future use with a currently undefined and experimental
@@ -210,7 +210,7 @@ hexadecimal number, with each chunk separated by a colon `:`.
 Lets have a look at a relatively short callsign, `N6DRC`:
 
  *  `N6D` encodes to `0x5CAC`
- *  `RC` encodes to `0x70F8`
+ *  `RC ` encodes to `0x70F8`
 
 Thus, the full ham address for this callsign is `5CAC:70F8:0000:0000`.
 
@@ -223,7 +223,7 @@ The process is identical for large callsigns, like `VI2BMARC50`:
  *  `VI2` encodes to `0x8B05`
  *  `BMA` encodes to `0x0E89`
  *  `RC5` encodes to `0x7118`
- *  `0` encodes to `0xA8C0`
+ *  `0  ` encodes to `0xA8C0`
 
 Thus, the ham address for this callsign is `8B05:0E89:7118:A8C0`.
 Since it is so long, there is no shorter representation.
@@ -241,11 +241,17 @@ callsign when necessary.
 
 ## Special HAM-64 Addresses
 
-All addresses larger than `F9FF:...` are special addresses, that do not
-have a callsign representation. These values are used for multicast
-and broadcast for link layers that use ham addresses natively. All
-values and ranges which are not explicitly defined below are to be
-considered reserved and not used.
+All addresses where the first chunk is greater than or equal to 0xFA00
+are *special addresses*. Special addresses do not have a callsign
+representations. These special addresses used for multicast and
+broadcast for link layers that use ham addresses natively. All values
+and ranges which are not explicitly defined below are to be considered
+**RESERVED**.
+
+### Empty Callsign
+
+The all-zero address (zero-length callsign) is **RESERVED** and
+**MUST NOT** be sent over the wire.
 
 ### Broadcast
 
@@ -274,13 +280,15 @@ addresses using addresses of the format `FBxx:xxxx:0000:0000`, where
 `x` represents the byte values for the last three octets of the IPv4
 multicast address.
 
-# EUI-48 and EUI-64 Encoding #
+# EUI-48 and EUI-64 #
 
 Sometimes it is useful to encode a callsign in an EUI-48 or EUI-64
 address. This can be useful when operating standard Wi-Fi or 802.15.4
 equipment under section 97 rules. While it is mathematically
 impossible to encode every HAM-64 address as either an EUI-48 or an
-EUI-64, a significant subset of addresses can be encoded.
+EUI-64, a significant subset of addresses can be encoded: 8 characters
+for EUI-48 and 11 characters for EUI-64. Under certain circumstances,
+a full 9 or 12 characters can be encoded.
 
 One of the goals of this encoding is to allow fast translation between
 a "ham-address" and its associated EUI-64 or EUI-48---specifically, no
@@ -289,21 +297,44 @@ have a direct one-to-one representation in an EUI-64 representation,
 with the last three bits assumed to be zero (which they will be if the
 last character is *NUL*).
 
-The basic algorithm for encoding works like this:
+## Encoding Process ##
+
+While there are some other minor caveats (see EUI-64 section below),
+the basic process for encoding works like this:
 
 1.  Rotate the address by 8 bits to the right (so that the last byte
     becomes the first byte)
 2.  Set the least-significant three bits of the first byte to '0',
     '1', '0'.
 
-Care was taken to ensure that a EUI-48-encoded ham address that has
-been converted to a EUI-64 address does not parse correctly unless
-converted to a EUI-48 first.
-
 **NOTE:** Special ham addresses (defined in a section above) MUST NOT
 be encoded as a EUI-48 or EUI-64 using this scheme! EUI-48 and EUI-64
 addresses have their own multicast/broadcast mapping, which must be
 used instead.
+
+## Decoding Process ##
+
+Not considering the minor caveats regarding decoding EUI-48-derived
+EUI-64 addresses (See EUI-64 section below), the basic process for
+decoding works like this:
+
+1.  Verify the least significant bits of the first byte are 0, 1, 0.
+2.  Verify the second byte is greater than 0x05. (Not strictly necessary,
+    but will cause many non-callsign-encoded addresses to fail early)
+3.  Clear the least-significant three bits of the first byte.
+4.  Rotate the address by 8 bits to the left (so that the first byte
+    becomes the last byte)
+5.  Verify that each chunk is less than 0xFA00.
+6.  Verify that the first chunk is greater than 0x063F.
+7.  Verify that, when all characters are decoded, all characters after
+    the first *NUL* are also *NUL*.
+
+If any of the verify steps above fail then the address is either
+corrupted or simply does not contain an encoded callsign.
+
+Care was taken to ensure that a EUI-48-encoded ham address that has
+been converted to a EUI-64 address does not parse correctly unless
+converted to a EUI-48 first.
 
 ## EUI-48
 
@@ -323,10 +354,10 @@ Where:
 
  *  `A` is the 16-bit ham address encoding of the first, second, and
     third characters of the callsign. Valid values are between
-    `0x0640` and `0xFA00`
+    `0x0640` and `0xF9FF`, inclusive.
  *  `B` is the 16-bit ham address encoding of the fourth, fifth, and
     sixth characters of the callsign. Valid values are between
-    `0x0000` and `0xFA00`
+    `0x0000` and `0xF9FF`, inclusive.
  *  `C` is the most-significant 13-bits of the 16-bit ham address
     encoding of the seventh and eighth characters of the callsign. The
     least-significant three bits are always assumed to be zero. Note
@@ -365,13 +396,13 @@ Where:
 
  *  `A` is the 16-bit ham address encoding of the first, second, and
     third character of the callsign. Valid values are between `0x0640`
-    and `0xFA00`
+    and `0xF9FF`, inclusive.
  *  `B` is the 16-bit ham address encoding of the fourth, fifth, and
     sixth characters of the callsign. Valid values are between
-    `0x0000` and `0xFA00`
+    `0x0000` and `0xF9FF`, inclusive.
  *  `C` is the 16-bit ham address encoding of the seventh, eighth, and
     ninth characters of the callsign. Valid values are between
-    `0x0000` and `0xFA00`
+    `0x0000` and `0xF9FF`, inclusive.
  *  `D` is the most-significant 13-bits of the 16-bit ham address
     encoding of the tenth and eleventh characters of the callsign. The
     least-significant three bits are always assumed to be zero. Note
@@ -395,6 +426,10 @@ evenly divisible by 8.
 Thus, if any of the following characters are the last character of a 9
 or 12 character callsign, it can still be represented fully as an
 EUI-48 or EUI-64: `H`, `P`, `X`, or `5`.
+
+The issue of whether such a 9-character address should be required
+to be encoded as a EUI-48 or a EUI-64 is to be decided. In the
+interim, assume EUI-64.
 
 {backmatter}
 
