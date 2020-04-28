@@ -60,7 +60,7 @@ $(XML2RFC_CACHE_DIR):
 	$(SED) 's/@SOURCE_VERSION@/$(SOURCE_VERSION)/g;s/@SOURCE_DATE@/$(SOURCE_DATE)/g' < $< > $@
 
 %.xml: %.md
-	$(MMARK) -xml2 -page $< $@
+	$(MMARK) -2 $< | sed 's/<note anchor="[^"]*"/<note/;s/<?rfc toc="yes"?>/<?rfc toc="yes"?><?rfc private="yes"?>/' > $@
 
 %.html: %.xml $(XML2RFC_CACHE_DIR)
 	$(XML2RFC) --html $<
