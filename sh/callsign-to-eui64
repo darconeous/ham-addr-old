@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # 2015-10-30
 #
@@ -31,8 +31,13 @@
 
 SCRIPT_PATH="`dirname $0`"
 
+function hamaddr() {
+	builtin cd ${SCRIPT_PATH}/../hamaddr
+	cargo run -q --release "$@" | awk '{print $NF}'
+}
+
 CALLSIGN=${1-$(xargs)}
-HAMADDR=$("${SCRIPT_PATH}/callsign-to-ham-addr" $CALLSIGN | sed 's/[^a-fA-F0-9]//g;s/0*$//;')
+HAMADDR=$(hamaddr $CALLSIGN | awk '{print $NF}' | sed 's/[^[:xdigit:]]//g;s/0*$//;')
 HAMADDRLEN=${#HAMADDR}
 HAMADDRLASTOCTAL=$((0x${HAMADDR:${#HAMADDR}-1:1} & 0x7))
 
@@ -64,7 +69,6 @@ else
 	MACADDR=`printf %02X%s $(((first_byte & 0xF8) + 0x02)) ${HAMADDR:0:14}`
 fi
 
-echo ${MACADDR} | sed 's/\([0-9a-fA-F]\{2\}\)\([0-9a-fA-F]\{2\}\)/\1:\2/g;s/\([0-9a-fA-F]\{2\}\)\([0-9a-fA-F]\{2\}\)/\1:\2/g'
+echo ${MACADDR} | sed 's/\([[:xdigit:]]\{2\}\)/&:/g;s/:$//'
 
 exit 0
-
