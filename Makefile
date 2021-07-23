@@ -28,7 +28,7 @@
 
 XML2RFC_CACHE_DIR ?= $(HOME)/.cache/xml2rfc
 
-TOOL_PREFIX        = $(DOCKER) run --rm --user=`id -u`:`id -g` -v `pwd`:/rfc -v $(XML2RFC_CACHE_DIR):/var/cache/xml2rfc paulej/rfctools
+TOOL_PREFIX        = $(DOCKER) run --rm --user=`id -u`:`id -g` -v `pwd`:/rfc -v $(XML2RFC_CACHE_DIR):/var/cache/xml2rfc paulej/rfctools:8
 
 DOCKER            ?= docker
 MD2RFC            ?= $(TOOL_PREFIX) md2rfc
