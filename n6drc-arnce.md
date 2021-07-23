@@ -1,12 +1,13 @@
 %%%
+
     title = "Amateur Radio Numeric Callsign Encoding"
     abbrev = "N6DRC ARNCE (ham-addr)"
     category = "std"
-    docName = "n6drc-arnce-2"
+    docName = "n6drc-arnce-x"
     ipr = "none"
     keyword = ["Ham Address", "EUI-48", "EUI-64", "Link Local", "Callsign", "Amateur Radio", "Ham Radio"]
 
-    date = 2017-09-25T00:00:00Z
+    date = 2021-02-02T00:00:00Z
 
     [pi]
     editing = "no"
@@ -26,6 +27,7 @@
       [author.address.postal]
       region = "California"
       country = "USA"
+
 %%%
 
 .# Abstract
@@ -46,7 +48,7 @@ callsigns.
 
 .# Copyright Notice
 
-Copyright (C) 2017 Robert Quattlebaum. All rights reserved.
+Copyright (C) 2017,2021 Robert Quattlebaum. All rights reserved.
 
 This use of this document is hereby granted under the terms of the
 Creative Commons International Attribution 4.0 Public License, as
@@ -94,7 +96,7 @@ encoding.
 Naively encoding a six-character callsign using ASCII requires at
 least 48 bits. However if we encoded each character using just six
 bits, this would make a six-character callsign take up only 36 bits.
-This is certainly an improvement, but we can still do better.
+This is certainly an improvement, but we can still do better!
 
 Callsigns exclusively consist of a collection of letters (A thru Z)
 and numeric digits (0 thru 9). There are also secondary suffixes which
@@ -122,7 +124,6 @@ following:
 *   EUI-48 and EUI-64 callsign encodings intended for use with
     existing link-layer protocols; capable of encoding callsigns up to
     8 and 11 characters long
-
 
 # Base-40 Character Set
 
@@ -156,35 +157,36 @@ that this character set could be useful for other purposes.
 Using the previously defined character set, we can store three characters
 as a single integer that fits within a 16-bit integer using the encoding:
 
-    S = CHAR[0] * 1600 + CHAR[1] * 40 + CHAR[2]
+    S = CHAR[0]*1600  +  CHAR[1]*40  +  CHAR[2]
 
 Where `CHAR[0]` is the first (leftmost) character and `CHAR[2]` is the
 last (rightmost) character in the "chunk".
 
 We can then decode the original characters by reversing that process:
 
-    CHAR[0] = S / 1600 MOD 40
-    CHAR[1] = S / 40 MOD 40
+    CHAR[0] = S/1600 MOD 40
+    CHAR[1] = S/40 MOD 40
     CHAR[2] = S MOD 40
 
 When encoding a chunk that uses less than three characters, you would
 set `CHAR[2]` and/or `CHAR[1]` (as appropriate) to the value 0
 (*NUL*), indicating that there is not a character present in that
-position.
+position. A chunk with no characters has the value zero.
 
-The maximum valid value using this three-character 16-bit encoding is
-0xF9FF. Any 16-bit value larger than 0xF9FF **MUST NOT** be decoded
-using the above mechanism. The such values **MAY** be used to indicate
-other conditions, or simply be treated as invalid. For example, the
-HAM-64 address format uses values larger than 0xF9FF in the first
-chunk as a way to indicate that the address is a special address.
-
-To encode callsigns longer than six characters, multiple 16-bit chunks
+To encode callsigns longer than three characters, multiple 16-bit chunks
 are concatenated.
 
-While this 16-bit base-40 encoding mechanism was designed specifically
-for use with the HAM-64 address format defined in the next section, it
-is possible that this encoding could be useful for other purposes.
+## Valid Chunk Encodings
+
+When properly encoded, the value of a three-character chunk will be
+either 0x0000 or between 0x0640 and 0xF9FF (inclusive). Any 16-bit
+value not in this set of valid values **MUST NOT** be decoded using
+the above mechanism. Such values **MAY** be used to indicate other
+conditions (outlined below), or alternatively be considered invalid.
+
+For example, the HAM-64 address format (outlined below) uses values
+larger than 0xF9FF in the first chunk as a way to indicate that the
+address is a special address.
 
 # HAM-64 Address Format
 
@@ -192,11 +194,12 @@ HAM-64 is a new link-layer addressing format, similar in purpose to
 the ubiquitous EUI-48 and EUI-64 address standards. It was specifically
 designed for compactness and encoding clarity. It's features include:
 
-*   Encodes callsigns up to 12 characters long, allowing for long
+*   Callsigns can be up to 12 characters long, allowing for long
     complex callsigns
 *   Variable length encoding, allowing for 16-bit, 32-bit, 48-bit, and
     64-bit representations of 3, 6, 9, and 12 character callsigns
-*   Broadcast and multicast address support
+*   Broadcast and multicast addressing
+*   Temporary short addresses
 
 ## Address Construction
 
@@ -205,18 +208,18 @@ which can contain up to three characters in each chunk. Chunks are
 always stored in big-endian order.
 
 When writing out a HAM-64 address, each chunk is shown as a four-digit
-hexadecimal number, with each chunk separated by a colon `:`.
+hexadecimal number, with each chunk separated by a dash `-`.
 
 Lets have a look at a relatively short callsign, `N6DRC`:
 
  *  `N6D` encodes to `0x5CAC`
  *  `RC ` encodes to `0x70F8`
 
-Thus, the full ham address for this callsign is `5CAC:70F8:0000:0000`.
+Thus, the full ham address for this callsign is `5CAC-70F8-0000-0000`.
 
 By convention, all trailing chunks with the value `0x0000` are omitted
 for brevity. Because the HAM-64 encoding of `N6DRC` has two trailing
-zero chunks, `5CAC:70F8` is the preferred notation.
+zero chunks, `5CAC-70F8` is the preferred notation.
 
 The process is identical for large callsigns, like `VI2BMARC50`:
 
@@ -225,7 +228,7 @@ The process is identical for large callsigns, like `VI2BMARC50`:
  *  `RC5` encodes to `0x7118`
  *  `0  ` encodes to `0xA8C0`
 
-Thus, the ham address for this callsign is `8B05:0E89:7118:A8C0`.
+Thus, the ham address for this callsign is `8B05-0E89-7118-A8C0`.
 Since it is so long, there is no shorter representation.
 
 ## Adaptive Address Size
@@ -242,31 +245,43 @@ callsign when necessary.
 ## Special HAM-64 Addresses
 
 All addresses where the first chunk is greater than or equal to 0xFA00
-are *special addresses*. Special addresses do not have a callsign
-representations. These special addresses used for multicast and
-broadcast for link layers that use ham addresses natively. All values
-and ranges which are not explicitly defined below are to be considered
-**RESERVED**.
+or less than 0x0640 are *special addresses*. Special addresses do not
+have direct callsign representations. All addresses within this range
+which are not explicitly defined below are to be considered **RESERVED**.
 
-### Empty Callsign
+### Empty/Unspecified Callsign
 
 The all-zero address (zero-length callsign) is **RESERVED** and
-**MUST NOT** be sent over the wire.
+**MUST NOT** be sent over the wire. It is intended to be used
+by implementations to represent an unspecified callsign.
+
+### Temporary Short Addresses
+
+16-bit HAM addresses between 0x0001 and 0x0639 (inclusive) are
+reserved for *Temporary Short Addresses*. These are considered
+placeholder values for an actual callsign. Temporary Short Addresses
+are automatically leased for a period of time from a network
+coordinator, the exact mechanism of which is out of the scope of this
+document. These addresses MUST NOT be used outside of the context of a
+network coordinator.
+
+If the link-layer does not support temporary short addresses, these
+addresses *MUST* be considered invalid.
 
 ### Broadcast
 
 The broadcast (all-nodes) address for link-layers using HAM-64
-addresses is defined as `FFFF:0000:0000:0000`.
+addresses is defined as `FFFF-0000-0000-0000`.
 
 ### IPv6 Multicast
 
 For link-layers using HAM-64 addresses for link-layer addressing,
 IPv6 multicast MUST be implemented using addresses of the format
-`FAxx:xxxx:xxxx:xxxx`, where `x` represents a special *reversed*
+`FAxx-xxxx-xxxx-xxxx`, where `x` represents a special *reversed*
 representation (defined below) of the IPv6 group-id.
 
 For converting IPv6 multicast addresses into link-local HAM-64
-multicast addresses, you MUST store the lower 13 octets of the
+multicast addresses, you MUST store the lower 7 octets of the
 multicast group-id *in reverse order*. This takes advantage of the
 fact that IPv6 multicast addresses tend to be zero-filled, allowing
 for compact HAM-64 address representations. For example, a multicast
@@ -276,9 +291,14 @@ address of `ff02::1` would simply be the abbreviated ham address
 ### IPv4 Multicast ###
 
 IPv4 multicast can be implemented for link-layers using HAM-64
-addresses using addresses of the format `FBxx:xxxx:0000:0000`, where
+addresses using addresses of the format `FBxx-xxxx-0000-0000`, where
 `x` represents the byte values for the last three octets of the IPv4
-multicast address.
+multicast address in reverse order. More specifically, a IPv4
+multicast address `aaa.xxx.yyy.zzz` would have an associated HAM-64
+address structured as `FBzz-yyxx-0000-0000'.
+
+For example, the multicast address `224.0.0.251` would use the HAM-64
+address `FBFB-0000-0000-0000` or just `FBFB` for short.
 
 # EUI-48 and EUI-64 #
 
@@ -307,7 +327,7 @@ the basic process for encoding works like this:
 2.  Set the least-significant three bits of the first byte to '0',
     '1', '0'.
 
-**NOTE:** Special ham addresses (defined in a section above) MUST NOT
+**NOTE:** Special ham addresses (defined in a section above) **MUST NOT**
 be encoded as a EUI-48 or EUI-64 using this scheme! EUI-48 and EUI-64
 addresses have their own multicast/broadcast mapping, which must be
 used instead.
@@ -320,7 +340,7 @@ decoding works like this:
 
 1.  Verify the least significant bits of the first byte are 0, 1, 0.
 2.  Verify the second byte is greater than 0x05. (Not strictly necessary,
-    but will cause many non-callsign-encoded addresses to fail early)
+    but will cause some non-callsign-encoded addresses to fail early)
 3.  Clear the least-significant three bits of the first byte.
 4.  Rotate the address by 8 bits to the left (so that the first byte
     becomes the last byte)
@@ -334,7 +354,7 @@ corrupted or simply does not contain an encoded callsign.
 
 Care was taken to ensure that a EUI-48-encoded ham address that has
 been converted to a EUI-64 address does not parse correctly unless
-converted to a EUI-48 first.
+converted to an EUI-48 first.
 
 ## EUI-48
 
@@ -364,7 +384,7 @@ Where:
     that octet 1 contains bits 7 thru 3 and octet 6 contains bits 15
     thru 8.
 
-So, for `N6DRC`, `5CAC:70F8:0000:0000` becomes `02:5C:AC:70:F8:00`.
+So, for `N6DRC`, `5CAC-70F8` becomes `02:5C:AC:70:F8:00`.
 
 ## EUI-64
 
@@ -411,8 +431,8 @@ Where:
 
 So, from our original examples:
 
- *  `N6DRC`: `5CAC:70F8:0000:0000` becomes `02:5C:AC:FF:FE:70:F8:00`
- *  `VI2BMARC50`: `8B05:0E89:7118:A8C0` becomes
+ *  `N6DRC`: `5CAC-70F8-0000-0000` becomes `02:5C:AC:FF:FE:70:F8:00`
+ *  `VI2BMARC50`: `8B05-0E89-7118-A8C0` becomes
     `C2:8B:05:0E:89:71:18:A8`
 
 ## 9-Char EUI-48 and 12-Char EUI-64 {#eui-hack}
@@ -438,31 +458,37 @@ interim, assume EUI-64.
 ## Callsigns
 
  *  `N6DRC`:
-    *  HAM-64: `5CAC:70F8:0000:0000`
+    *  HAM-64: `5CAC-70F8-0000-0000`
     *  EUI-48: `02:5C:AC:70:F8:00`
     *  EUI-64: `02:5C:AC:FF:FE:70:F8:00`
  *  `KJ6QOH/P`:
-    *  HAM-64: `4671:6CA0:F000:0000`
+    *  HAM-64: `4671-6CA0-F000-0000`
     *  EUI-48: `02:46:71:6C:A0:F0`
     *  EUI-64: `02:46:71:FF:FE:6C:A0:F0`
  *  `D9K`:
-    *  HAM-64: `1EAB:0000:0000:0000`
+    *  HAM-64: `1EAB-0000-0000-0000`
     *  EUI-48: `02:1E:AB:00:00:00`
     *  EUI-64: `02:1E:AB:FF:FE:00:00:00`
  *  `NA1SS`:
-    *  HAM-64: `57C4:79B8:0000:0000`
+    *  HAM-64: `57C4-79B8-0000-0000`
     *  EUI-48: `02:57:C4:79:B8:00`
     *  EUI-64: `02:57:C4:FF:FE:79:B8:00`
  *  `VI2BMARC50`:
-    *  HAM-64: `8B05:0E89:7118:A8C0`
+    *  HAM-64: `8B05-0E89-7118-A8C0`
     *  EUI-48: N/A
     *  EUI-64: `C2:8B:05:0E:89:71:18:A8`
 
 ## IPv6 Multicast
 
  * `ff02::1`
-    *  HAM-64: `FA01:0000:0000:0000`
-    *  EUI-48: `33:33:00:00:01`
+    *  HAM-64: `FA01-0000-0000-0000`
+    *  EUI-48: `33:33:00:00:00:01`
+
+## IPv4 Multicast
+
+ * `224.0.0.251`
+    *  HAM-64: `FBFB-0000-0000-0000`
+    *  EUI-48: `01:00:5e:00:00:01`
 
 # References and Links
 
