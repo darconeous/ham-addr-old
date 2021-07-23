@@ -4,7 +4,7 @@
 
                                                      R. Quattlebaum, Ed.
                                                               Individual
-                                                      September 25, 2017
+                                                           June 23, 2021
 
 
                 Amateur Radio Numeric Callsign Encoding
@@ -27,7 +27,7 @@ Abstract
 
 Copyright Notice
 
-   Copyright (C) 2017 Robert Quattlebaum.  All rights reserved.
+   Copyright (C) 2017,2021 Robert Quattlebaum.  All rights reserved.
 
    This use of this document is hereby granted under the terms of the
    Creative Commons International Attribution 4.0 Public License, as
@@ -53,9 +53,9 @@ Implementations of this standard
 
 
 
-Quattlebaum              Expires March 29, 2018                 [Page 1]
+Quattlebaum             Expires December 25, 2021               [Page 1]
 
-                         N6DRC ARNCE (ham-addr)           September 2017
+                         N6DRC ARNCE (ham-addr)                June 2021
 
 
    implementation of said mechanisms, are offered freely to be used for
@@ -66,26 +66,29 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
    2.  Base-40 Character Set . . . . . . . . . . . . . . . . . . . .   3
    3.  16-Bit Chunk Encoding . . . . . . . . . . . . . . . . . . . .   4
+     3.1.  Valid Chunk Encodings . . . . . . . . . . . . . . . . . .   5
    4.  HAM-64 Address Format . . . . . . . . . . . . . . . . . . . .   5
      4.1.  Address Construction  . . . . . . . . . . . . . . . . . .   5
      4.2.  Adaptive Address Size . . . . . . . . . . . . . . . . . .   6
      4.3.  Special HAM-64 Addresses  . . . . . . . . . . . . . . . .   6
-       4.3.1.  Empty Callsign  . . . . . . . . . . . . . . . . . . .   6
-       4.3.2.  Broadcast . . . . . . . . . . . . . . . . . . . . . .   6
-       4.3.3.  IPv6 Multicast  . . . . . . . . . . . . . . . . . . .   6
-       4.3.4.  IPv4 Multicast  . . . . . . . . . . . . . . . . . . .   7
+       4.3.1.  Empty/Unspecified Callsign  . . . . . . . . . . . . .   6
+       4.3.2.  Temporary Short Addresses . . . . . . . . . . . . . .   6
+       4.3.3.  Broadcast . . . . . . . . . . . . . . . . . . . . . .   7
+       4.3.4.  IPv6 Multicast  . . . . . . . . . . . . . . . . . . .   7
+       4.3.5.  IPv4 Multicast  . . . . . . . . . . . . . . . . . . .   7
    5.  EUI-48 and EUI-64 . . . . . . . . . . . . . . . . . . . . . .   7
-     5.1.  Encoding Process  . . . . . . . . . . . . . . . . . . . .   7
+     5.1.  Encoding Process  . . . . . . . . . . . . . . . . . . . .   8
      5.2.  Decoding Process  . . . . . . . . . . . . . . . . . . . .   8
-     5.3.  EUI-48  . . . . . . . . . . . . . . . . . . . . . . . . .   8
+     5.3.  EUI-48  . . . . . . . . . . . . . . . . . . . . . . . . .   9
      5.4.  EUI-64  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     5.5.  9-Char EUI-48 and 12-Char EUI-64  . . . . . . . . . . . .  10
-     6.1.  URIs  . . . . . . . . . . . . . . . . . . . . . . . . . .  10
+     5.5.  9-Char EUI-48 and 12-Char EUI-64  . . . . . . . . . . . .  11
+     6.1.  URIs  . . . . . . . . . . . . . . . . . . . . . . . . . .  11
    Appendix A.  Examples and Test Vectors  . . . . . . . . . . . . .  11
      A.1.  Callsigns . . . . . . . . . . . . . . . . . . . . . . . .  11
      A.2.  IPv6 Multicast  . . . . . . . . . . . . . . . . . . . . .  12
+     A.3.  IPv4 Multicast  . . . . . . . . . . . . . . . . . . . . .  12
    Appendix B.  References and Links . . . . . . . . . . . . . . . .  12
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  12
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  13
 
 1.  Introduction
 
@@ -102,22 +105,22 @@ Table of Contents
    callsign that can currently be assigned to an individual is seven
    characters long, which means that operators which are assigned seven-
    character callsigns cannot legally use AX.25.  Additionally, the
+
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 2]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
+
    callsign is encoded as plain ASCII text, which is hardly the most
    compact encoding.
-
-
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 2]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
 
    Naively encoding a six-character callsign using ASCII requires at
    least 48 bits.  However if we encoded each character using just six
    bits, this would make a six-character callsign take up only 36 bits.
-   This is certainly an improvement, but we can still do better.
+   This is certainly an improvement, but we can still do better!
 
    Callsigns exclusively consist of a collection of letters (A thru Z)
    and numeric digits (0 thru 9).  There are also secondary suffixes
@@ -162,12 +165,9 @@ Quattlebaum              Expires March 29, 2018                 [Page 2]
 
 
 
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 3]
+Quattlebaum             Expires December 25, 2021               [Page 3]
 
-                         N6DRC ARNCE (ham-addr)           September 2017
+                         N6DRC ARNCE (ham-addr)                June 2021
 
 
         +-----+-------+-----+------+-----+------+-----+-----------+
@@ -199,44 +199,44 @@ Quattlebaum              Expires March 29, 2018                 [Page 3]
    characters as a single integer that fits within a 16-bit integer
    using the encoding:
 
-   S = CHAR[0] * 1600 + CHAR[1] * 40 + CHAR[2]
+   S = CHAR[0]*1600  +  CHAR[1]*40  +  CHAR[2]
 
    Where "CHAR[0]" is the first (leftmost) character and "CHAR[2]" is
    the last (rightmost) character in the "chunk".
 
    We can then decode the original characters by reversing that process:
 
-   CHAR[0] = S / 1600 MOD 40
-   CHAR[1] = S / 40 MOD 40
+   CHAR[0] = S/1600 MOD 40
+   CHAR[1] = S/40 MOD 40
    CHAR[2] = S MOD 40
 
    When encoding a chunk that uses less than three characters, you would
    set "CHAR[2]" and/or "CHAR[1]" (as appropriate) to the value 0
    (_NUL_), indicating that there is not a character present in that
-   position.
+   position.  A chunk with no characters has the value zero.
 
-   The maximum valid value using this three-character 16-bit encoding is
-   0xF9FF.  Any 16-bit value larger than 0xF9FF MUST NOT be decoded
-   using the above mechanism.  The such values MAY be used to indicate
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 4]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
-
-   other conditions, or simply be treated as invalid.  For example, the
-   HAM-64 address format uses values larger than 0xF9FF in the first
-   chunk as a way to indicate that the address is a special address.
-
-   To encode callsigns longer than six characters, multiple 16-bit
+   To encode callsigns longer than three characters, multiple 16-bit
    chunks are concatenated.
 
-   While this 16-bit base-40 encoding mechanism was designed
-   specifically for use with the HAM-64 address format defined in the
-   next section, it is possible that this encoding could be useful for
-   other purposes.
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 4]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
+
+3.1.  Valid Chunk Encodings
+
+   When properly encoded, the value of a three-character chunk will be
+   either 0x0000 or between 0x0640 and 0xF9FF (inclusive).  Any 16-bit
+   value not in this set of valid values MUST NOT be decoded using the
+   above mechanism.  Such values MAY be used to indicate other
+   conditions (outlined below), or alternatively be considered invalid.
+
+   For example, the HAM-64 address format (outlined below) uses values
+   larger than 0xF9FF in the first chunk as a way to indicate that the
+   address is a special address.
 
 4.  HAM-64 Address Format
 
@@ -245,13 +245,15 @@ Quattlebaum              Expires March 29, 2018                 [Page 4]
    specifically designed for compactness and encoding clarity.  It's
    features include:
 
-   o  Encodes callsigns up to 12 characters long, allowing for long
+   o  Callsigns can be up to 12 characters long, allowing for long
       complex callsigns
 
    o  Variable length encoding, allowing for 16-bit, 32-bit, 48-bit, and
       64-bit representations of 3, 6, 9, and 12 character callsigns
 
-   o  Broadcast and multicast address support
+   o  Broadcast and multicast addressing
+
+   o  Temporary short addresses
 
 4.1.  Address Construction
 
@@ -260,7 +262,7 @@ Quattlebaum              Expires March 29, 2018                 [Page 4]
    always stored in big-endian order.
 
    When writing out a HAM-64 address, each chunk is shown as a four-
-   digit hexadecimal number, with each chunk separated by a colon ":".
+   digit hexadecimal number, with each chunk separated by a dash "-".
 
    Lets have a look at a relatively short callsign, "N6DRC":
 
@@ -268,19 +270,21 @@ Quattlebaum              Expires March 29, 2018                 [Page 4]
 
    o  "RC" encodes to "0x70F8"
 
-   Thus, the full ham address for this callsign is
-   "5CAC:70F8:0000:0000".
+   Thus, the full ham address for this callsign is "5CAC-
+   70F8-0000-0000".
+
+
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 5]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
 
    By convention, all trailing chunks with the value "0x0000" are
    omitted for brevity.  Because the HAM-64 encoding of "N6DRC" has two
-   trailing zero chunks, "5CAC:70F8" is the preferred notation.
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 5]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
+   trailing zero chunks, "5CAC-70F8" is the preferred notation.
 
    The process is identical for large callsigns, like "VI2BMARC50":
 
@@ -292,7 +296,7 @@ Quattlebaum              Expires March 29, 2018                 [Page 5]
 
    o  "0" encodes to "0xA8C0"
 
-   Thus, the ham address for this callsign is "8B05:0E89:7118:A8C0".
+   Thus, the ham address for this callsign is "8B05-0E89-7118-A8C0".
    Since it is so long, there is no shorter representation.
 
 4.2.  Adaptive Address Size
@@ -309,52 +313,69 @@ Quattlebaum              Expires March 29, 2018                 [Page 5]
 4.3.  Special HAM-64 Addresses
 
    All addresses where the first chunk is greater than or equal to
-   0xFA00 are _special addresses_. Special addresses do not have a
-   callsign representations.  These special addresses used for multicast
-   and broadcast for link layers that use ham addresses natively.  All
-   values and ranges which are not explicitly defined below are to be
+   0xFA00 or less than 0x0640 are _special addresses_. Special addresses
+   do not have direct callsign representations.  All addresses within
+   this range which are not explicitly defined below are to be
    considered *RESERVED*.
 
-4.3.1.  Empty Callsign
+4.3.1.  Empty/Unspecified Callsign
 
    The all-zero address (zero-length callsign) is *RESERVED* and MUST
-   NOT be sent over the wire.
+   NOT be sent over the wire.  It is intended to be used by
+   implementations to represent an unspecified callsign.
 
-4.3.2.  Broadcast
+4.3.2.  Temporary Short Addresses
+
+   16-bit HAM addresses between 0x0001 and 0x0639 (inclusive) are
+   reserved for _Temporary Short Addresses_. These are considered
+   placeholder values for an actual callsign.  Temporary Short Addresses
+   are automatically leased for a period of time from a network
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 6]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
+
+   coordinator, the exact mechanism of which is out of the scope of this
+   document.  These addresses MUST NOT be used outside of the context of
+   a network coordinator.
+
+   If the link-layer does not support temporary short addresses, these
+   addresses _MUST_ be considered invalid.
+
+4.3.3.  Broadcast
 
    The broadcast (all-nodes) address for link-layers using HAM-64
-   addresses is defined as "FFFF:0000:0000:0000".
+   addresses is defined as "FFFF-0000-0000-0000".
 
-4.3.3.  IPv6 Multicast
+4.3.4.  IPv6 Multicast
 
    For link-layers using HAM-64 addresses for link-layer addressing,
    IPv6 multicast MUST be implemented using addresses of the format
-
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 6]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
-
-   "FAxx:xxxx:xxxx:xxxx", where "x" represents a special _reversed_
+   "FAxx-xxxx-xxxx-xxxx", where "x" represents a special _reversed_
    representation (defined below) of the IPv6 group-id.
 
    For converting IPv6 multicast addresses into link-local HAM-64
-   multicast addresses, you MUST store the lower 13 octets of the
+   multicast addresses, you MUST store the lower 7 octets of the
    multicast group-id _in reverse order_. This takes advantage of the
    fact that IPv6 multicast addresses tend to be zero-filled, allowing
    for compact HAM-64 address representations.  For example, a multicast
    address of "ff02::1" would simply be the abbreviated ham address
    "FA01".
 
-4.3.4.  IPv4 Multicast
+4.3.5.  IPv4 Multicast
 
    IPv4 multicast can be implemented for link-layers using HAM-64
-   addresses using addresses of the format "FBxx:xxxx:0000:0000", where
+   addresses using addresses of the format "FBxx-xxxx-0000-0000", where
    "x" represents the byte values for the last three octets of the IPv4
-   multicast address.
+   multicast address in reverse order.  More specifically, a IPv4
+   multicast address "aaa.xxx.yyy.zzz" would have an associated HAM-64
+   address structured as `FBzz-yyxx-0000-0000'.
+
+   For example, the multicast address "224.0.0.251" would use the HAM-64
+   address "FBFB-0000-0000-0000" or just "FBFB" for short.
 
 5.  EUI-48 and EUI-64
 
@@ -365,6 +386,13 @@ Quattlebaum              Expires March 29, 2018                 [Page 6]
    EUI-48 or an EUI-64, a significant subset of addresses can be
    encoded: 8 characters for EUI-48 and 11 characters for EUI-64.  Under
    certain circumstances, a full 9 or 12 characters can be encoded.
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 7]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
 
    One of the goals of this encoding is to allow fast translation
    between a "ham-address" and its associated EUI-64 or EUI-48---
@@ -386,14 +414,6 @@ Quattlebaum              Expires March 29, 2018                 [Page 6]
 
    *NOTE:* Special ham addresses (defined in a section above) MUST NOT
    be encoded as a EUI-48 or EUI-64 using this scheme!  EUI-48 and
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 7]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
-
    EUI-64 addresses have their own multicast/broadcast mapping, which
    must be used instead.
 
@@ -406,7 +426,7 @@ Quattlebaum              Expires March 29, 2018                 [Page 7]
    1.  Verify the least significant bits of the first byte are 0, 1, 0.
 
    2.  Verify the second byte is greater than 0x05.  (Not strictly
-       necessary, but will cause many non-callsign-encoded addresses to
+       necessary, but will cause some non-callsign-encoded addresses to
        fail early)
 
    3.  Clear the least-significant three bits of the first byte.
@@ -421,12 +441,21 @@ Quattlebaum              Expires March 29, 2018                 [Page 7]
    7.  Verify that, when all characters are decoded, all characters
        after the first _NUL_ are also _NUL_.
 
+
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 8]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
+
    If any of the verify steps above fail then the address is either
    corrupted or simply does not contain an encoded callsign.
 
    Care was taken to ensure that a EUI-48-encoded ham address that has
    been converted to a EUI-64 address does not parse correctly unless
-   converted to a EUI-48 first.
+   converted to an EUI-48 first.
 
 5.3.  EUI-48
 
@@ -441,14 +470,6 @@ Quattlebaum              Expires March 29, 2018                 [Page 7]
    ... +---------------+ +---------------+ +---------------+ L
    ... |B|B|B|B|B|B|B|B| |B|B|B|B|B|B|B|B| |C|C|C|C|C|C|C|C| S
    ... +---------------+ +---------------+ +---------------+ B
-
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 8]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
 
    Where:
 
@@ -466,7 +487,7 @@ Quattlebaum              Expires March 29, 2018                 [Page 8]
       Note that octet 1 contains bits 7 thru 3 and octet 6 contains bits
       15 thru 8.
 
-   So, for "N6DRC", "5CAC:70F8:0000:0000" becomes "02:5C:AC:70:F8:00".
+   So, for "N6DRC", "5CAC-70F8" becomes "02:5C:AC:70:F8:00".
 
 5.4.  EUI-64
 
@@ -477,6 +498,14 @@ Quattlebaum              Expires March 29, 2018                 [Page 8]
    If the callsign is 8 characters or less, then you MUST encode your
    callsign as an EUI-48 and convert it to an EUI-64 using the standard
    EUI-48 to EUI-64 mechanism (using "0xFFFE" for the padding value).
+
+
+
+Quattlebaum             Expires December 25, 2021               [Page 9]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
+
    For callsigns larger than 8 characters, we follow similar logic that
    we did when constructing the EUI-48:
 
@@ -496,15 +525,6 @@ Quattlebaum              Expires March 29, 2018                 [Page 8]
    ... +---------------+ +---------------+ +---------------+ B
 
    Where:
-
-
-
-
-
-Quattlebaum              Expires March 29, 2018                 [Page 9]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
 
    o  "A" is the 16-bit ham address encoding of the first, second, and
       third character of the callsign.  Valid values are between
@@ -526,10 +546,21 @@ Quattlebaum              Expires March 29, 2018                 [Page 9]
 
    So, from our original examples:
 
-   o  "N6DRC": "5CAC:70F8:0000:0000" becomes "02:5C:AC:FF:FE:70:F8:00"
+   o  "N6DRC": "5CAC-70F8-0000-0000" becomes "02:5C:AC:FF:FE:70:F8:00"
 
-   o  "VI2BMARC50": "8B05:0E89:7118:A8C0" becomes
+   o  "VI2BMARC50": "8B05-0E89-7118-A8C0" becomes
       "C2:8B:05:0E:89:71:18:A8"
+
+
+
+
+
+
+
+Quattlebaum             Expires December 25, 2021              [Page 10]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
 
 5.5.  9-Char EUI-48 and 12-Char EUI-64
 
@@ -555,13 +586,6 @@ Quattlebaum              Expires March 29, 2018                 [Page 9]
 
    [2] https://gist.github.com/darconeous/e1c7c352098671a36230
 
-
-
-Quattlebaum              Expires March 29, 2018                [Page 10]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
-
    [3] http://www.ng3k.com/Dxcc/dxcc.html
 
    [4] https://tools.ietf.org/html/rfc5234
@@ -572,7 +596,7 @@ A.1.  Callsigns
 
    o  "N6DRC":
 
-      *  HAM-64: "5CAC:70F8:0000:0000"
+      *  HAM-64: "5CAC-70F8-0000-0000"
 
       *  EUI-48: "02:5C:AC:70:F8:00"
 
@@ -580,15 +604,23 @@ A.1.  Callsigns
 
    o  "KJ6QOH/P":
 
-      *  HAM-64: "4671:6CA0:F000:0000"
+      *  HAM-64: "4671-6CA0-F000-0000"
 
       *  EUI-48: "02:46:71:6C:A0:F0"
 
       *  EUI-64: "02:46:71:FF:FE:6C:A0:F0"
 
+
+
+
+Quattlebaum             Expires December 25, 2021              [Page 11]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
+
    o  "D9K":
 
-      *  HAM-64: "1EAB:0000:0000:0000"
+      *  HAM-64: "1EAB-0000-0000-0000"
 
       *  EUI-48: "02:1E:AB:00:00:00"
 
@@ -596,7 +628,7 @@ A.1.  Callsigns
 
    o  "NA1SS":
 
-      *  HAM-64: "57C4:79B8:0000:0000"
+      *  HAM-64: "57C4-79B8-0000-0000"
 
       *  EUI-48: "02:57:C4:79:B8:00"
 
@@ -604,27 +636,27 @@ A.1.  Callsigns
 
    o  "VI2BMARC50":
 
-      *  HAM-64: "8B05:0E89:7118:A8C0"
+      *  HAM-64: "8B05-0E89-7118-A8C0"
 
       *  EUI-48: N/A
 
       *  EUI-64: "C2:8B:05:0E:89:71:18:A8"
 
-
-
-
-Quattlebaum              Expires March 29, 2018                [Page 11]
-
-                         N6DRC ARNCE (ham-addr)           September 2017
-
-
 A.2.  IPv6 Multicast
 
    o  "ff02::1"
 
-      *  HAM-64: "FA01:0000:0000:0000"
+      *  HAM-64: "FA01-0000-0000-0000"
 
-      *  EUI-48: "33:33:00:00:01"
+      *  EUI-48: "33:33:00:00:00:01"
+
+A.3.  IPv4 Multicast
+
+   o  "224.0.0.251"
+
+      *  HAM-64: "FBFB-0000-0000-0000"
+
+      *  EUI-48: "01:00:5e:00:00:01"
 
 Appendix B.  References and Links
 
@@ -633,6 +665,14 @@ Appendix B.  References and Links
    o  http://www.ng3k.com/Dxcc/dxcc.html [3]
 
    o  https://tools.ietf.org/html/rfc5234 [4]
+
+
+
+
+Quattlebaum             Expires December 25, 2021              [Page 12]
+
+                         N6DRC ARNCE (ham-addr)                June 2021
+
 
 Author's Address
 
@@ -669,4 +709,20 @@ Author's Address
 
 
 
-Quattlebaum              Expires March 29, 2018                [Page 12]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Quattlebaum             Expires December 25, 2021              [Page 13]

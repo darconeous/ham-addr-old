@@ -377,14 +377,16 @@
 <link href="#rfc.section.1" rel="Chapter" title="1 Introduction">
 <link href="#rfc.section.2" rel="Chapter" title="2 Base-40 Character Set">
 <link href="#rfc.section.3" rel="Chapter" title="3 16-Bit Chunk Encoding">
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Valid Chunk Encodings">
 <link href="#rfc.section.4" rel="Chapter" title="4 HAM-64 Address Format">
 <link href="#rfc.section.4.1" rel="Chapter" title="4.1 Address Construction">
 <link href="#rfc.section.4.2" rel="Chapter" title="4.2 Adaptive Address Size">
 <link href="#rfc.section.4.3" rel="Chapter" title="4.3 Special HAM-64 Addresses">
-<link href="#rfc.section.4.3.1" rel="Chapter" title="4.3.1 Empty Callsign">
-<link href="#rfc.section.4.3.2" rel="Chapter" title="4.3.2 Broadcast">
-<link href="#rfc.section.4.3.3" rel="Chapter" title="4.3.3 IPv6 Multicast">
-<link href="#rfc.section.4.3.4" rel="Chapter" title="4.3.4 IPv4 Multicast">
+<link href="#rfc.section.4.3.1" rel="Chapter" title="4.3.1 Empty/Unspecified Callsign">
+<link href="#rfc.section.4.3.2" rel="Chapter" title="4.3.2 Temporary Short Addresses">
+<link href="#rfc.section.4.3.3" rel="Chapter" title="4.3.3 Broadcast">
+<link href="#rfc.section.4.3.4" rel="Chapter" title="4.3.4 IPv6 Multicast">
+<link href="#rfc.section.4.3.5" rel="Chapter" title="4.3.5 IPv4 Multicast">
 <link href="#rfc.section.5" rel="Chapter" title="5 EUI-48 and EUI-64">
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Encoding Process">
 <link href="#rfc.section.5.2" rel="Chapter" title="5.2 Decoding Process">
@@ -394,6 +396,7 @@
 <link href="#rfc.appendix.A" rel="Chapter" title="A Examples and Test Vectors">
 <link href="#rfc.appendix.A.1" rel="Chapter" title="A.1 Callsigns">
 <link href="#rfc.appendix.A.2" rel="Chapter" title="A.2 IPv6 Multicast">
+<link href="#rfc.appendix.A.3" rel="Chapter" title="A.3 IPv4 Multicast">
 <link href="#rfc.appendix.B" rel="Chapter" title="B References and Links">
 <link href="#rfc.authors" rel="Chapter">
 
@@ -403,7 +406,7 @@
 
   <meta name="dct.creator" content="Quattlebaum, R., Ed." />
   <meta name="dct.identifier" content="urn:ietf:id:" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-09-25" />
+  <meta name="dct.issued" scheme="ISO8601" content="2021-06-23" />
   <meta name="dct.abstract" content="This document describes a mechanism for efficiently and reversibly encoding radio callsigns into compact numeric identifiers. It also defines two addressing mechanisms using this numeric encoding: A new adaptive link-layer addressing scheme (HAM-64) intended for use with new link-layer networking protocols like ARNGLL (Up to 12 characters), and an adaptation of EUI-48 and EUI-64 addresses (Up to 8 and 11 characters, respectively) intended for use with existing link layer protocols." />
   <meta name="description" content="This document describes a mechanism for efficiently and reversibly encoding radio callsigns into compact numeric identifiers. It also defines two addressing mechanisms using this numeric encoding: A new adaptive link-layer addressing scheme (HAM-64) intended for use with new link-layer networking protocols like ARNGLL (Up to 12 characters), and an adaptation of EUI-48 and EUI-64 addresses (Up to 8 and 11 characters, respectively) intended for use with existing link layer protocols." />
 
@@ -424,7 +427,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">September 25, 2017</td>
+<td class="right">June 23, 2021</td>
 </tr>
 
 
@@ -438,7 +441,7 @@
 <p>This document describes a mechanism for efficiently and reversibly encoding radio callsigns into compact numeric identifiers. It also defines two addressing mechanisms using this numeric encoding: A new adaptive link-layer addressing scheme (HAM-64) intended for use with new link-layer networking protocols like ARNGLL (Up to 12 characters), and an adaptation of EUI-48 and EUI-64 addresses (Up to 8 and 11 characters, respectively) intended for use with existing link layer protocols.</p>
 <p>While this callsign encoding/addressing schemes was developed for amateur radio purposes, there is no technical reason why it could not be used directly with other radio services that make use of ITU callsigns.</p>
 <h1><a>Copyright Notice</a></h1>
-<p>Copyright (C) 2017 Robert Quattlebaum. All rights reserved.</p>
+<p>Copyright (C) 2017,2021 Robert Quattlebaum. All rights reserved.</p>
 <p>This use of this document is hereby granted under the terms of the Creative Commons International Attribution 4.0 Public License, as published by Creative Commons.</p>
 <p></p>
 
@@ -460,7 +463,9 @@
 </li>
 <li>3.   <a href="#rfc.section.3">16-Bit Chunk Encoding</a>
 </li>
-<li>4.   <a href="#rfc.section.4">HAM-64 Address Format</a>
+<ul><li>3.1.   <a href="#rfc.section.3.1">Valid Chunk Encodings</a>
+</li>
+</ul><li>4.   <a href="#rfc.section.4">HAM-64 Address Format</a>
 </li>
 <ul><li>4.1.   <a href="#rfc.section.4.1">Address Construction</a>
 </li>
@@ -468,13 +473,15 @@
 </li>
 <li>4.3.   <a href="#rfc.section.4.3">Special HAM-64 Addresses</a>
 </li>
-<ul><li>4.3.1.   <a href="#rfc.section.4.3.1">Empty Callsign</a>
+<ul><li>4.3.1.   <a href="#rfc.section.4.3.1">Empty/Unspecified Callsign</a>
 </li>
-<li>4.3.2.   <a href="#rfc.section.4.3.2">Broadcast</a>
+<li>4.3.2.   <a href="#rfc.section.4.3.2">Temporary Short Addresses</a>
 </li>
-<li>4.3.3.   <a href="#rfc.section.4.3.3">IPv6 Multicast</a>
+<li>4.3.3.   <a href="#rfc.section.4.3.3">Broadcast</a>
 </li>
-<li>4.3.4.   <a href="#rfc.section.4.3.4">IPv4 Multicast</a>
+<li>4.3.4.   <a href="#rfc.section.4.3.4">IPv6 Multicast</a>
+</li>
+<li>4.3.5.   <a href="#rfc.section.4.3.5">IPv4 Multicast</a>
 </li>
 </ul></ul><li>5.   <a href="#rfc.section.5">EUI-48 and EUI-64</a>
 </li>
@@ -494,6 +501,8 @@
 </li>
 <li>A.2.   <a href="#rfc.appendix.A.2">IPv6 Multicast</a>
 </li>
+<li>A.3.   <a href="#rfc.appendix.A.3">IPv4 Multicast</a>
+</li>
 </ul><li>Appendix B.   <a href="#rfc.appendix.B">References and Links</a>
 </li>
 <li><a href="#rfc.authors">Author's Address</a>
@@ -507,7 +516,7 @@
 </h1>
 <p id="rfc.section.1.p.1">Radio callsigns are used to identify the source (and possibly the destination) of licensed radio transmissions. Radio callsigns are generally assigned to individuals or organizations for identification purposes by the local regulatory authority, such as the FCC in the United States.</p>
 <p id="rfc.section.1.p.2">Their presence in transmissions is often mandated by regulations, which works well for voice and constant-wave (CW or morse-code) modes, but doesn't work well for packet radio. AX.25, for example, imposes a hard 6-character limit on callsign length. The longest callsign that can currently be assigned to an individual is seven characters long, which means that operators which are assigned seven-character callsigns cannot legally use AX.25. Additionally, the callsign is encoded as plain ASCII text, which is hardly the most compact encoding.</p>
-<p id="rfc.section.1.p.3">Naively encoding a six-character callsign using ASCII requires at least 48 bits. However if we encoded each character using just six bits, this would make a six-character callsign take up only 36 bits.  This is certainly an improvement, but we can still do better.</p>
+<p id="rfc.section.1.p.3">Naively encoding a six-character callsign using ASCII requires at least 48 bits. However if we encoded each character using just six bits, this would make a six-character callsign take up only 36 bits.  This is certainly an improvement, but we can still do better!</p>
 <p id="rfc.section.1.p.4">Callsigns exclusively consist of a collection of letters (A thru Z) and numeric digits (0 thru 9). There are also secondary suffixes which can be appended with the slash character <samp>/</samp>, giving us a total of 37 individual symbols that can be present in a callsign. We can use this limited character set to our advantage.</p>
 <p id="rfc.section.1.p.5">It turns out that if we limit ourselves to fewer than 40 different possible symbols, we can store up to three characters in a 16-bit block. Thus, we can store a six character callsign in just 32 bits, a nine character callsign in 48 bits and a twelve character callsign in 64 bits. 12 characters is plenty of space for both a callsign <em>and</em> an indicator suffix/prefix.</p>
 <p id="rfc.section.1.p.6">This document takes the basic premise described above and fleshes it out into a full addressing specification by fully defining the following:</p>
@@ -647,18 +656,21 @@
 <a href="#rfc.section.3">3.</a> <a href="#chunk-encoding" id="chunk-encoding">16-Bit Chunk Encoding</a>
 </h1>
 <p id="rfc.section.3.p.1">Using the previously defined character set, we can store three characters as a single integer that fits within a 16-bit integer using the encoding:</p>
-<pre>S = CHAR[0] * 1600 + CHAR[1] * 40 + CHAR[2]
+<pre>S = CHAR[0]*1600  +  CHAR[1]*40  +  CHAR[2]
 </pre>
 <p id="rfc.section.3.p.2">Where <samp>CHAR[0]</samp> is the first (leftmost) character and <samp>CHAR[2]</samp> is the last (rightmost) character in the "chunk".</p>
 <p id="rfc.section.3.p.3">We can then decode the original characters by reversing that process:</p>
-<pre>CHAR[0] = S / 1600 MOD 40
-CHAR[1] = S / 40 MOD 40
+<pre>CHAR[0] = S/1600 MOD 40
+CHAR[1] = S/40 MOD 40
 CHAR[2] = S MOD 40
 </pre>
-<p id="rfc.section.3.p.4">When encoding a chunk that uses less than three characters, you would set <samp>CHAR[2]</samp> and/or <samp>CHAR[1]</samp> (as appropriate) to the value 0 (<em>NUL</em>), indicating that there is not a character present in that position.</p>
-<p id="rfc.section.3.p.5">The maximum valid value using this three-character 16-bit encoding is 0xF9FF. Any 16-bit value larger than 0xF9FF MUST NOT be decoded using the above mechanism. The such values MAY be used to indicate other conditions, or simply be treated as invalid. For example, the HAM-64 address format uses values larger than 0xF9FF in the first chunk as a way to indicate that the address is a special address.</p>
-<p id="rfc.section.3.p.6">To encode callsigns longer than six characters, multiple 16-bit chunks are concatenated.</p>
-<p id="rfc.section.3.p.7">While this 16-bit base-40 encoding mechanism was designed specifically for use with the HAM-64 address format defined in the next section, it is possible that this encoding could be useful for other purposes.</p>
+<p id="rfc.section.3.p.4">When encoding a chunk that uses less than three characters, you would set <samp>CHAR[2]</samp> and/or <samp>CHAR[1]</samp> (as appropriate) to the value 0 (<em>NUL</em>), indicating that there is not a character present in that position. A chunk with no characters has the value zero.</p>
+<p id="rfc.section.3.p.5">To encode callsigns longer than three characters, multiple 16-bit chunks are concatenated.</p>
+<h1 id="rfc.section.3.1">
+<a href="#rfc.section.3.1">3.1.</a> <a href="#valid-chunk-encodings" id="valid-chunk-encodings">Valid Chunk Encodings</a>
+</h1>
+<p id="rfc.section.3.1.p.1">When properly encoded, the value of a three-character chunk will be either 0x0000 or between 0x0640 and 0xF9FF (inclusive). Any 16-bit value not in this set of valid values MUST NOT be decoded using the above mechanism. Such values MAY be used to indicate other conditions (outlined below), or alternatively be considered invalid.</p>
+<p id="rfc.section.3.1.p.2">For example, the HAM-64 address format (outlined below) uses values larger than 0xF9FF in the first chunk as a way to indicate that the address is a special address.</p>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#ham-64-address-format" id="ham-64-address-format">HAM-64 Address Format</a>
 </h1>
@@ -666,9 +678,10 @@ CHAR[2] = S MOD 40
 <p></p>
 
 <ul>
-<li>Encodes callsigns up to 12 characters long, allowing for long complex callsigns</li>
+<li>Callsigns can be up to 12 characters long, allowing for long complex callsigns</li>
 <li>Variable length encoding, allowing for 16-bit, 32-bit, 48-bit, and 64-bit representations of 3, 6, 9, and 12 character callsigns</li>
-<li>Broadcast and multicast address support</li>
+<li>Broadcast and multicast addressing</li>
+<li>Temporary short addresses</li>
 </ul>
 
 <p> </p>
@@ -676,7 +689,7 @@ CHAR[2] = S MOD 40
 <a href="#rfc.section.4.1">4.1.</a> <a href="#address-construction" id="address-construction">Address Construction</a>
 </h1>
 <p id="rfc.section.4.1.p.1">HAM-64 addresses are encoded as four 16-bit big-endian "chunks", which can contain up to three characters in each chunk. Chunks are always stored in big-endian order.</p>
-<p id="rfc.section.4.1.p.2">When writing out a HAM-64 address, each chunk is shown as a four-digit hexadecimal number, with each chunk separated by a colon <samp>:</samp>.</p>
+<p id="rfc.section.4.1.p.2">When writing out a HAM-64 address, each chunk is shown as a four-digit hexadecimal number, with each chunk separated by a dash <samp>-</samp>.</p>
 <p id="rfc.section.4.1.p.3">Lets have a look at a relatively short callsign, <samp>N6DRC</samp>:</p>
 <p></p>
 
@@ -690,8 +703,8 @@ CHAR[2] = S MOD 40
 </ul>
 
 <p> </p>
-<p id="rfc.section.4.1.p.5">Thus, the full ham address for this callsign is <samp>5CAC:70F8:0000:0000</samp>.</p>
-<p id="rfc.section.4.1.p.6">By convention, all trailing chunks with the value <samp>0x0000</samp> are omitted for brevity. Because the HAM-64 encoding of <samp>N6DRC</samp> has two trailing zero chunks, <samp>5CAC:70F8</samp> is the preferred notation.</p>
+<p id="rfc.section.4.1.p.5">Thus, the full ham address for this callsign is <samp>5CAC-70F8-0000-0000</samp>.</p>
+<p id="rfc.section.4.1.p.6">By convention, all trailing chunks with the value <samp>0x0000</samp> are omitted for brevity. Because the HAM-64 encoding of <samp>N6DRC</samp> has two trailing zero chunks, <samp>5CAC-70F8</samp> is the preferred notation.</p>
 <p id="rfc.section.4.1.p.7">The process is identical for large callsigns, like <samp>VI2BMARC50</samp>:</p>
 <p></p>
 
@@ -711,7 +724,7 @@ CHAR[2] = S MOD 40
 </ul>
 
 <p> </p>
-<p id="rfc.section.4.1.p.9">Thus, the ham address for this callsign is <samp>8B05:0E89:7118:A8C0</samp>.  Since it is so long, there is no shorter representation.</p>
+<p id="rfc.section.4.1.p.9">Thus, the ham address for this callsign is <samp>8B05-0E89-7118-A8C0</samp>.  Since it is so long, there is no shorter representation.</p>
 <h1 id="rfc.section.4.2">
 <a href="#rfc.section.4.2">4.2.</a> <a href="#adaptive-address-size" id="adaptive-address-size">Adaptive Address Size</a>
 </h1>
@@ -719,24 +732,30 @@ CHAR[2] = S MOD 40
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> <a href="#special-ham-64-addresses" id="special-ham-64-addresses">Special HAM-64 Addresses</a>
 </h1>
-<p id="rfc.section.4.3.p.1">All addresses where the first chunk is greater than or equal to 0xFA00 are <em>special addresses</em>. Special addresses do not have a callsign representations. These special addresses used for multicast and broadcast for link layers that use ham addresses natively. All values and ranges which are not explicitly defined below are to be considered <strong>RESERVED</strong>.</p>
+<p id="rfc.section.4.3.p.1">All addresses where the first chunk is greater than or equal to 0xFA00 or less than 0x0640 are <em>special addresses</em>. Special addresses do not have direct callsign representations. All addresses within this range which are not explicitly defined below are to be considered <strong>RESERVED</strong>.</p>
 <h1 id="rfc.section.4.3.1">
-<a href="#rfc.section.4.3.1">4.3.1.</a> <a href="#empty-callsign" id="empty-callsign">Empty Callsign</a>
+<a href="#rfc.section.4.3.1">4.3.1.</a> <a href="#empty-unspecified-callsign" id="empty-unspecified-callsign">Empty/Unspecified Callsign</a>
 </h1>
-<p id="rfc.section.4.3.1.p.1">The all-zero address (zero-length callsign) is <strong>RESERVED</strong> and MUST NOT be sent over the wire.</p>
+<p id="rfc.section.4.3.1.p.1">The all-zero address (zero-length callsign) is <strong>RESERVED</strong> and MUST NOT be sent over the wire. It is intended to be used by implementations to represent an unspecified callsign.</p>
 <h1 id="rfc.section.4.3.2">
-<a href="#rfc.section.4.3.2">4.3.2.</a> <a href="#broadcast" id="broadcast">Broadcast</a>
+<a href="#rfc.section.4.3.2">4.3.2.</a> <a href="#temporary-short-addresses" id="temporary-short-addresses">Temporary Short Addresses</a>
 </h1>
-<p id="rfc.section.4.3.2.p.1">The broadcast (all-nodes) address for link-layers using HAM-64 addresses is defined as <samp>FFFF:0000:0000:0000</samp>.</p>
+<p id="rfc.section.4.3.2.p.1">16-bit HAM addresses between 0x0001 and 0x0639 (inclusive) are reserved for <em>Temporary Short Addresses</em>. These are considered placeholder values for an actual callsign. Temporary Short Addresses are automatically leased for a period of time from a network coordinator, the exact mechanism of which is out of the scope of this document. These addresses MUST NOT be used outside of the context of a network coordinator.</p>
+<p id="rfc.section.4.3.2.p.2">If the link-layer does not support temporary short addresses, these addresses <em>MUST</em> be considered invalid.</p>
 <h1 id="rfc.section.4.3.3">
-<a href="#rfc.section.4.3.3">4.3.3.</a> <a href="#ipv6-multicast" id="ipv6-multicast">IPv6 Multicast</a>
+<a href="#rfc.section.4.3.3">4.3.3.</a> <a href="#broadcast" id="broadcast">Broadcast</a>
 </h1>
-<p id="rfc.section.4.3.3.p.1">For link-layers using HAM-64 addresses for link-layer addressing, IPv6 multicast MUST be implemented using addresses of the format <samp>FAxx:xxxx:xxxx:xxxx</samp>, where <samp>x</samp> represents a special <em>reversed</em> representation (defined below) of the IPv6 group-id.</p>
-<p id="rfc.section.4.3.3.p.2">For converting IPv6 multicast addresses into link-local HAM-64 multicast addresses, you MUST store the lower 13 octets of the multicast group-id <em>in reverse order</em>. This takes advantage of the fact that IPv6 multicast addresses tend to be zero-filled, allowing for compact HAM-64 address representations. For example, a multicast address of <samp>ff02::1</samp> would simply be the abbreviated ham address <samp>FA01</samp>.</p>
+<p id="rfc.section.4.3.3.p.1">The broadcast (all-nodes) address for link-layers using HAM-64 addresses is defined as <samp>FFFF-0000-0000-0000</samp>.</p>
 <h1 id="rfc.section.4.3.4">
-<a href="#rfc.section.4.3.4">4.3.4.</a> <a href="#ipv4-multicast" id="ipv4-multicast">IPv4 Multicast</a>
+<a href="#rfc.section.4.3.4">4.3.4.</a> <a href="#ipv6-multicast" id="ipv6-multicast">IPv6 Multicast</a>
 </h1>
-<p id="rfc.section.4.3.4.p.1">IPv4 multicast can be implemented for link-layers using HAM-64 addresses using addresses of the format <samp>FBxx:xxxx:0000:0000</samp>, where <samp>x</samp> represents the byte values for the last three octets of the IPv4 multicast address.</p>
+<p id="rfc.section.4.3.4.p.1">For link-layers using HAM-64 addresses for link-layer addressing, IPv6 multicast MUST be implemented using addresses of the format <samp>FAxx-xxxx-xxxx-xxxx</samp>, where <samp>x</samp> represents a special <em>reversed</em> representation (defined below) of the IPv6 group-id.</p>
+<p id="rfc.section.4.3.4.p.2">For converting IPv6 multicast addresses into link-local HAM-64 multicast addresses, you MUST store the lower 7 octets of the multicast group-id <em>in reverse order</em>. This takes advantage of the fact that IPv6 multicast addresses tend to be zero-filled, allowing for compact HAM-64 address representations. For example, a multicast address of <samp>ff02::1</samp> would simply be the abbreviated ham address <samp>FA01</samp>.</p>
+<h1 id="rfc.section.4.3.5">
+<a href="#rfc.section.4.3.5">4.3.5.</a> <a href="#ipv4-multicast" id="ipv4-multicast">IPv4 Multicast</a>
+</h1>
+<p id="rfc.section.4.3.5.p.1">IPv4 multicast can be implemented for link-layers using HAM-64 addresses using addresses of the format <samp>FBxx-xxxx-0000-0000</samp>, where <samp>x</samp> represents the byte values for the last three octets of the IPv4 multicast address in reverse order. More specifically, a IPv4 multicast address <samp>aaa.xxx.yyy.zzz</samp> would have an associated HAM-64 address structured as `FBzz-yyxx-0000-0000'.</p>
+<p id="rfc.section.4.3.5.p.2">For example, the multicast address <samp>224.0.0.251</samp> would use the HAM-64 address <samp>FBFB-0000-0000-0000</samp> or just <samp>FBFB</samp> for short.</p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#eui-48-and-eui-64" id="eui-48-and-eui-64">EUI-48 and EUI-64</a>
 </h1>
@@ -763,7 +782,7 @@ CHAR[2] = S MOD 40
 
 <ol>
 <li>Verify the least significant bits of the first byte are 0, 1, 0.</li>
-<li>Verify the second byte is greater than 0x05. (Not strictly necessary, but will cause many non-callsign-encoded addresses to fail early)</li>
+<li>Verify the second byte is greater than 0x05. (Not strictly necessary, but will cause some non-callsign-encoded addresses to fail early)</li>
 <li>Clear the least-significant three bits of the first byte.</li>
 <li>Rotate the address by 8 bits to the left (so that the first byte becomes the last byte)</li>
 <li>Verify that each chunk is less than 0xFA00.</li>
@@ -773,7 +792,7 @@ CHAR[2] = S MOD 40
 
 <p> </p>
 <p id="rfc.section.5.2.p.3">If any of the verify steps above fail then the address is either corrupted or simply does not contain an encoded callsign.</p>
-<p id="rfc.section.5.2.p.4">Care was taken to ensure that a EUI-48-encoded ham address that has been converted to a EUI-64 address does not parse correctly unless converted to a EUI-48 first.</p>
+<p id="rfc.section.5.2.p.4">Care was taken to ensure that a EUI-48-encoded ham address that has been converted to a EUI-64 address does not parse correctly unless converted to an EUI-48 first.</p>
 <h1 id="rfc.section.5.3">
 <a href="#rfc.section.5.3">5.3.</a> <a href="#eui-48" id="eui-48">EUI-48</a>
 </h1>
@@ -801,7 +820,7 @@ B +---------------+ +---------------+ +---------------+ ...
 </ul>
 
 <p> </p>
-<p id="rfc.section.5.3.p.4">So, for <samp>N6DRC</samp>, <samp>5CAC:70F8:0000:0000</samp> becomes <samp>02:5C:AC:70:F8:00</samp>.</p>
+<p id="rfc.section.5.3.p.4">So, for <samp>N6DRC</samp>, <samp>5CAC-70F8</samp> becomes <samp>02:5C:AC:70:F8:00</samp>.</p>
 <h1 id="rfc.section.5.4">
 <a href="#rfc.section.5.4">5.4.</a> <a href="#eui-64" id="eui-64">EUI-64</a>
 </h1>
@@ -842,10 +861,10 @@ B +---------------+ +---------------+ +---------------+ ...
 
 <ul>
 <li>
-<samp>N6DRC</samp>: <samp>5CAC:70F8:0000:0000</samp> becomes <samp>02:5C:AC:FF:FE:70:F8:00</samp>
+<samp>N6DRC</samp>: <samp>5CAC-70F8-0000-0000</samp> becomes <samp>02:5C:AC:FF:FE:70:F8:00</samp>
 </li>
 <li>
-<samp>VI2BMARC50</samp>: <samp>8B05:0E89:7118:A8C0</samp> becomes <samp>C2:8B:05:0E:89:71:18:A8</samp>
+<samp>VI2BMARC50</samp>: <samp>8B05-0E89-7118-A8C0</samp> becomes <samp>C2:8B:05:0E:89:71:18:A8</samp>
 </li>
 </ul>
 
@@ -867,7 +886,7 @@ B +---------------+ +---------------+ +---------------+ ...
 <ul>
 <li>
 <samp>N6DRC</samp>: <ul>
-<li>HAM-64: <samp>5CAC:70F8:0000:0000</samp>
+<li>HAM-64: <samp>5CAC-70F8-0000-0000</samp>
 </li>
 <li>EUI-48: <samp>02:5C:AC:70:F8:00</samp>
 </li>
@@ -877,7 +896,7 @@ B +---------------+ +---------------+ +---------------+ ...
 </li>
 <li>
 <samp>KJ6QOH/P</samp>: <ul>
-<li>HAM-64: <samp>4671:6CA0:F000:0000</samp>
+<li>HAM-64: <samp>4671-6CA0-F000-0000</samp>
 </li>
 <li>EUI-48: <samp>02:46:71:6C:A0:F0</samp>
 </li>
@@ -887,7 +906,7 @@ B +---------------+ +---------------+ +---------------+ ...
 </li>
 <li>
 <samp>D9K</samp>: <ul>
-<li>HAM-64: <samp>1EAB:0000:0000:0000</samp>
+<li>HAM-64: <samp>1EAB-0000-0000-0000</samp>
 </li>
 <li>EUI-48: <samp>02:1E:AB:00:00:00</samp>
 </li>
@@ -897,7 +916,7 @@ B +---------------+ +---------------+ +---------------+ ...
 </li>
 <li>
 <samp>NA1SS</samp>: <ul>
-<li>HAM-64: <samp>57C4:79B8:0000:0000</samp>
+<li>HAM-64: <samp>57C4-79B8-0000-0000</samp>
 </li>
 <li>EUI-48: <samp>02:57:C4:79:B8:00</samp>
 </li>
@@ -907,7 +926,7 @@ B +---------------+ +---------------+ +---------------+ ...
 </li>
 <li>
 <samp>VI2BMARC50</samp>: <ul>
-<li>HAM-64: <samp>8B05:0E89:7118:A8C0</samp>
+<li>HAM-64: <samp>8B05-0E89-7118-A8C0</samp>
 </li>
 <li>EUI-48: N/A</li>
 <li>EUI-64: <samp>C2:8B:05:0E:89:71:18:A8</samp>
@@ -924,9 +943,24 @@ B +---------------+ +---------------+ +---------------+ ...
 
 <ul><li>
 <samp>ff02::1</samp> <ul>
-<li>HAM-64: <samp>FA01:0000:0000:0000</samp>
+<li>HAM-64: <samp>FA01-0000-0000-0000</samp>
 </li>
-<li>EUI-48: <samp>33:33:00:00:01</samp>
+<li>EUI-48: <samp>33:33:00:00:00:01</samp>
+</li>
+</ul>
+</li></ul>
+
+<p> </p>
+<h1 id="rfc.appendix.A.3">
+<a href="#rfc.appendix.A.3">A.3.</a> <a href="#ipv4-multicast-1" id="ipv4-multicast-1">IPv4 Multicast</a>
+</h1>
+<p></p>
+
+<ul><li>
+<samp>224.0.0.251</samp> <ul>
+<li>HAM-64: <samp>FBFB-0000-0000-0000</samp>
+</li>
+<li>EUI-48: <samp>01:00:5e:00:00:01</samp>
 </li>
 </ul>
 </li></ul>

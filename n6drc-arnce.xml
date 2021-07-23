@@ -9,7 +9,7 @@
 <region>California</region>
 </postal><email>darco@deepdarc.com</email>
 </address></author>
-<date year="2017" month="September" day="25"></date>
+<date year="2021" month="June" day="23"></date>
 <area>Internet</area><workgroup></workgroup><keyword>Ham Address</keyword>
 <keyword>EUI-48</keyword>
 <keyword>EUI-64</keyword>
@@ -33,7 +33,7 @@ callsigns.</t>
 </abstract>
 
 <note title="Copyright Notice">
-<t>Copyright (C) 2017 Robert Quattlebaum. All rights reserved.</t>
+<t>Copyright (C) 2017,2021 Robert Quattlebaum. All rights reserved.</t>
 <t>This use of this document is hereby granted under the terms of the
 Creative Commons International Attribution 4.0 Public License, as
 published by Creative Commons.</t>
@@ -82,7 +82,7 @@ encoding.</t>
 <t>Naively encoding a six-character callsign using ASCII requires at
 least 48 bits. However if we encoded each character using just six
 bits, this would make a six-character callsign take up only 36 bits.
-This is certainly an improvement, but we can still do better.</t>
+This is certainly an improvement, but we can still do better!</t>
 <t>Callsigns exclusively consist of a collection of letters (A thru Z)
 and numeric digits (0 thru 9). There are also secondary suffixes which
 can be appended with the slash character <spanx style="verb">/</spanx>, giving us a total of 37
@@ -229,33 +229,35 @@ that this character set could be useful for other purposes.</t>
 <t>Using the previously defined character set, we can store three characters
 as a single integer that fits within a 16-bit integer using the encoding:</t>
 
-<figure><artwork>S = CHAR[0] * 1600 + CHAR[1] * 40 + CHAR[2]
+<figure><artwork>S = CHAR[0]*1600  +  CHAR[1]*40  +  CHAR[2]
 </artwork></figure>
 
 <t>Where <spanx style="verb">CHAR[0]</spanx> is the first (leftmost) character and <spanx style="verb">CHAR[2]</spanx> is the
 last (rightmost) character in the &quot;chunk&quot;.</t>
 <t>We can then decode the original characters by reversing that process:</t>
 
-<figure><artwork>CHAR[0] = S / 1600 MOD 40
-CHAR[1] = S / 40 MOD 40
+<figure><artwork>CHAR[0] = S/1600 MOD 40
+CHAR[1] = S/40 MOD 40
 CHAR[2] = S MOD 40
 </artwork></figure>
 
 <t>When encoding a chunk that uses less than three characters, you would
 set <spanx style="verb">CHAR[2]</spanx> and/or <spanx style="verb">CHAR[1]</spanx> (as appropriate) to the value 0
 (<spanx style="emph">NUL</spanx>), indicating that there is not a character present in that
-position.</t>
-<t>The maximum valid value using this three-character 16-bit encoding is
-0xF9FF. Any 16-bit value larger than 0xF9FF MUST NOT be decoded
-using the above mechanism. The such values MAY be used to indicate
-other conditions, or simply be treated as invalid. For example, the
-HAM-64 address format uses values larger than 0xF9FF in the first
-chunk as a way to indicate that the address is a special address.</t>
-<t>To encode callsigns longer than six characters, multiple 16-bit chunks
+position. A chunk with no characters has the value zero.</t>
+<t>To encode callsigns longer than three characters, multiple 16-bit chunks
 are concatenated.</t>
-<t>While this 16-bit base-40 encoding mechanism was designed specifically
-for use with the HAM-64 address format defined in the next section, it
-is possible that this encoding could be useful for other purposes.</t>
+
+<section anchor="valid-chunk-encodings" title="Valid Chunk Encodings">
+<t>When properly encoded, the value of a three-character chunk will be
+either 0x0000 or between 0x0640 and 0xF9FF (inclusive). Any 16-bit
+value not in this set of valid values MUST NOT be decoded using
+the above mechanism. Such values MAY be used to indicate other
+conditions (outlined below), or alternatively be considered invalid.</t>
+<t>For example, the HAM-64 address format (outlined below) uses values
+larger than 0xF9FF in the first chunk as a way to indicate that the
+address is a special address.</t>
+</section>
 </section>
 
 <section anchor="ham-64-address-format" title="HAM-64 Address Format">
@@ -264,11 +266,12 @@ the ubiquitous EUI-48 and EUI-64 address standards. It was specifically
 designed for compactness and encoding clarity. It's features include:</t>
 <t>
 <list style="symbols">
-<t>Encodes callsigns up to 12 characters long, allowing for long
+<t>Callsigns can be up to 12 characters long, allowing for long
 complex callsigns</t>
 <t>Variable length encoding, allowing for 16-bit, 32-bit, 48-bit, and
 64-bit representations of 3, 6, 9, and 12 character callsigns</t>
-<t>Broadcast and multicast address support</t>
+<t>Broadcast and multicast addressing</t>
+<t>Temporary short addresses</t>
 </list>
 </t>
 
@@ -277,7 +280,7 @@ complex callsigns</t>
 which can contain up to three characters in each chunk. Chunks are
 always stored in big-endian order.</t>
 <t>When writing out a HAM-64 address, each chunk is shown as a four-digit
-hexadecimal number, with each chunk separated by a colon <spanx style="verb">:</spanx>.</t>
+hexadecimal number, with each chunk separated by a dash <spanx style="verb">-</spanx>.</t>
 <t>Lets have a look at a relatively short callsign, <spanx style="verb">N6DRC</spanx>:</t>
 <t>
 <list style="symbols">
@@ -285,10 +288,10 @@ hexadecimal number, with each chunk separated by a colon <spanx style="verb">:</
 <t><spanx style="verb">RC</spanx> encodes to <spanx style="verb">0x70F8</spanx></t>
 </list>
 </t>
-<t>Thus, the full ham address for this callsign is <spanx style="verb">5CAC:70F8:0000:0000</spanx>.</t>
+<t>Thus, the full ham address for this callsign is <spanx style="verb">5CAC-70F8-0000-0000</spanx>.</t>
 <t>By convention, all trailing chunks with the value <spanx style="verb">0x0000</spanx> are omitted
 for brevity. Because the HAM-64 encoding of <spanx style="verb">N6DRC</spanx> has two trailing
-zero chunks, <spanx style="verb">5CAC:70F8</spanx> is the preferred notation.</t>
+zero chunks, <spanx style="verb">5CAC-70F8</spanx> is the preferred notation.</t>
 <t>The process is identical for large callsigns, like <spanx style="verb">VI2BMARC50</spanx>:</t>
 <t>
 <list style="symbols">
@@ -298,7 +301,7 @@ zero chunks, <spanx style="verb">5CAC:70F8</spanx> is the preferred notation.</t
 <t><spanx style="verb">0</spanx> encodes to <spanx style="verb">0xA8C0</spanx></t>
 </list>
 </t>
-<t>Thus, the ham address for this callsign is <spanx style="verb">8B05:0E89:7118:A8C0</spanx>.
+<t>Thus, the ham address for this callsign is <spanx style="verb">8B05-0E89-7118-A8C0</spanx>.
 Since it is so long, there is no shorter representation.</t>
 </section>
 
@@ -315,29 +318,40 @@ callsign when necessary.</t>
 
 <section anchor="special-ham-64-addresses" title="Special HAM-64 Addresses">
 <t>All addresses where the first chunk is greater than or equal to 0xFA00
-are <spanx style="emph">special addresses</spanx>. Special addresses do not have a callsign
-representations. These special addresses used for multicast and
-broadcast for link layers that use ham addresses natively. All values
-and ranges which are not explicitly defined below are to be considered
-<spanx style="strong">RESERVED</spanx>.</t>
+or less than 0x0640 are <spanx style="emph">special addresses</spanx>. Special addresses do not
+have direct callsign representations. All addresses within this range
+which are not explicitly defined below are to be considered <spanx style="strong">RESERVED</spanx>.</t>
 
-<section anchor="empty-callsign" title="Empty Callsign">
+<section anchor="empty-unspecified-callsign" title="Empty/Unspecified Callsign">
 <t>The all-zero address (zero-length callsign) is <spanx style="strong">RESERVED</spanx> and
-MUST NOT be sent over the wire.</t>
+MUST NOT be sent over the wire. It is intended to be used
+by implementations to represent an unspecified callsign.</t>
+</section>
+
+<section anchor="temporary-short-addresses" title="Temporary Short Addresses">
+<t>16-bit HAM addresses between 0x0001 and 0x0639 (inclusive) are
+reserved for <spanx style="emph">Temporary Short Addresses</spanx>. These are considered
+placeholder values for an actual callsign. Temporary Short Addresses
+are automatically leased for a period of time from a network
+coordinator, the exact mechanism of which is out of the scope of this
+document. These addresses MUST NOT be used outside of the context of a
+network coordinator.</t>
+<t>If the link-layer does not support temporary short addresses, these
+addresses <spanx style="emph">MUST</spanx> be considered invalid.</t>
 </section>
 
 <section anchor="broadcast" title="Broadcast">
 <t>The broadcast (all-nodes) address for link-layers using HAM-64
-addresses is defined as <spanx style="verb">FFFF:0000:0000:0000</spanx>.</t>
+addresses is defined as <spanx style="verb">FFFF-0000-0000-0000</spanx>.</t>
 </section>
 
 <section anchor="ipv6-multicast" title="IPv6 Multicast">
 <t>For link-layers using HAM-64 addresses for link-layer addressing,
 IPv6 multicast MUST be implemented using addresses of the format
-<spanx style="verb">FAxx:xxxx:xxxx:xxxx</spanx>, where <spanx style="verb">x</spanx> represents a special <spanx style="emph">reversed</spanx>
+<spanx style="verb">FAxx-xxxx-xxxx-xxxx</spanx>, where <spanx style="verb">x</spanx> represents a special <spanx style="emph">reversed</spanx>
 representation (defined below) of the IPv6 group-id.</t>
 <t>For converting IPv6 multicast addresses into link-local HAM-64
-multicast addresses, you MUST store the lower 13 octets of the
+multicast addresses, you MUST store the lower 7 octets of the
 multicast group-id <spanx style="emph">in reverse order</spanx>. This takes advantage of the
 fact that IPv6 multicast addresses tend to be zero-filled, allowing
 for compact HAM-64 address representations. For example, a multicast
@@ -347,9 +361,13 @@ address of <spanx style="verb">ff02::1</spanx> would simply be the abbreviated h
 
 <section anchor="ipv4-multicast" title="IPv4 Multicast">
 <t>IPv4 multicast can be implemented for link-layers using HAM-64
-addresses using addresses of the format <spanx style="verb">FBxx:xxxx:0000:0000</spanx>, where
+addresses using addresses of the format <spanx style="verb">FBxx-xxxx-0000-0000</spanx>, where
 <spanx style="verb">x</spanx> represents the byte values for the last three octets of the IPv4
-multicast address.</t>
+multicast address in reverse order. More specifically, a IPv4
+multicast address <spanx style="verb">aaa.xxx.yyy.zzz</spanx> would have an associated HAM-64
+address structured as `FBzz-yyxx-0000-0000'.</t>
+<t>For example, the multicast address <spanx style="verb">224.0.0.251</spanx> would use the HAM-64
+address <spanx style="verb">FBFB-0000-0000-0000</spanx> or just <spanx style="verb">FBFB</spanx> for short.</t>
 </section>
 </section>
 </section>
@@ -394,7 +412,7 @@ decoding works like this:</t>
 <list style="numbers">
 <t>Verify the least significant bits of the first byte are 0, 1, 0.</t>
 <t>Verify the second byte is greater than 0x05. (Not strictly necessary,
-but will cause many non-callsign-encoded addresses to fail early)</t>
+but will cause some non-callsign-encoded addresses to fail early)</t>
 <t>Clear the least-significant three bits of the first byte.</t>
 <t>Rotate the address by 8 bits to the left (so that the first byte
 becomes the last byte)</t>
@@ -408,7 +426,7 @@ the first <spanx style="emph">NUL</spanx> are also <spanx style="emph">NUL</span
 corrupted or simply does not contain an encoded callsign.</t>
 <t>Care was taken to ensure that a EUI-48-encoded ham address that has
 been converted to a EUI-64 address does not parse correctly unless
-converted to a EUI-48 first.</t>
+converted to an EUI-48 first.</t>
 </section>
 
 <section anchor="eui-48" title="EUI-48">
@@ -441,7 +459,7 @@ that octet 1 contains bits 7 thru 3 and octet 6 contains bits 15
 thru 8.</t>
 </list>
 </t>
-<t>So, for <spanx style="verb">N6DRC</spanx>, <spanx style="verb">5CAC:70F8:0000:0000</spanx> becomes <spanx style="verb">02:5C:AC:70:F8:00</spanx>.</t>
+<t>So, for <spanx style="verb">N6DRC</spanx>, <spanx style="verb">5CAC-70F8</spanx> becomes <spanx style="verb">02:5C:AC:70:F8:00</spanx>.</t>
 </section>
 
 <section anchor="eui-64" title="EUI-64">
@@ -491,8 +509,8 @@ thru 8.</t>
 <t>So, from our original examples:</t>
 <t>
 <list style="symbols">
-<t><spanx style="verb">N6DRC</spanx>: <spanx style="verb">5CAC:70F8:0000:0000</spanx> becomes <spanx style="verb">02:5C:AC:FF:FE:70:F8:00</spanx></t>
-<t><spanx style="verb">VI2BMARC50</spanx>: <spanx style="verb">8B05:0E89:7118:A8C0</spanx> becomes
+<t><spanx style="verb">N6DRC</spanx>: <spanx style="verb">5CAC-70F8-0000-0000</spanx> becomes <spanx style="verb">02:5C:AC:FF:FE:70:F8:00</spanx></t>
+<t><spanx style="verb">VI2BMARC50</spanx>: <spanx style="verb">8B05-0E89-7118-A8C0</spanx> becomes
 <spanx style="verb">C2:8B:05:0E:89:71:18:A8</spanx></t>
 </list>
 </t>
@@ -524,31 +542,31 @@ interim, assume EUI-64.</t>
 <list style="symbols">
 <t><spanx style="verb">N6DRC</spanx>:
 <list style="symbols">
-<t>HAM-64: <spanx style="verb">5CAC:70F8:0000:0000</spanx></t>
+<t>HAM-64: <spanx style="verb">5CAC-70F8-0000-0000</spanx></t>
 <t>EUI-48: <spanx style="verb">02:5C:AC:70:F8:00</spanx></t>
 <t>EUI-64: <spanx style="verb">02:5C:AC:FF:FE:70:F8:00</spanx></t>
 </list></t>
 <t><spanx style="verb">KJ6QOH/P</spanx>:
 <list style="symbols">
-<t>HAM-64: <spanx style="verb">4671:6CA0:F000:0000</spanx></t>
+<t>HAM-64: <spanx style="verb">4671-6CA0-F000-0000</spanx></t>
 <t>EUI-48: <spanx style="verb">02:46:71:6C:A0:F0</spanx></t>
 <t>EUI-64: <spanx style="verb">02:46:71:FF:FE:6C:A0:F0</spanx></t>
 </list></t>
 <t><spanx style="verb">D9K</spanx>:
 <list style="symbols">
-<t>HAM-64: <spanx style="verb">1EAB:0000:0000:0000</spanx></t>
+<t>HAM-64: <spanx style="verb">1EAB-0000-0000-0000</spanx></t>
 <t>EUI-48: <spanx style="verb">02:1E:AB:00:00:00</spanx></t>
 <t>EUI-64: <spanx style="verb">02:1E:AB:FF:FE:00:00:00</spanx></t>
 </list></t>
 <t><spanx style="verb">NA1SS</spanx>:
 <list style="symbols">
-<t>HAM-64: <spanx style="verb">57C4:79B8:0000:0000</spanx></t>
+<t>HAM-64: <spanx style="verb">57C4-79B8-0000-0000</spanx></t>
 <t>EUI-48: <spanx style="verb">02:57:C4:79:B8:00</spanx></t>
 <t>EUI-64: <spanx style="verb">02:57:C4:FF:FE:79:B8:00</spanx></t>
 </list></t>
 <t><spanx style="verb">VI2BMARC50</spanx>:
 <list style="symbols">
-<t>HAM-64: <spanx style="verb">8B05:0E89:7118:A8C0</spanx></t>
+<t>HAM-64: <spanx style="verb">8B05-0E89-7118-A8C0</spanx></t>
 <t>EUI-48: N/A</t>
 <t>EUI-64: <spanx style="verb">C2:8B:05:0E:89:71:18:A8</spanx></t>
 </list></t>
@@ -561,8 +579,20 @@ interim, assume EUI-64.</t>
 <list style="symbols">
 <t><spanx style="verb">ff02::1</spanx>
 <list style="symbols">
-<t>HAM-64: <spanx style="verb">FA01:0000:0000:0000</spanx></t>
-<t>EUI-48: <spanx style="verb">33:33:00:00:01</spanx></t>
+<t>HAM-64: <spanx style="verb">FA01-0000-0000-0000</spanx></t>
+<t>EUI-48: <spanx style="verb">33:33:00:00:00:01</spanx></t>
+</list></t>
+</list>
+</t>
+</section>
+
+<section anchor="ipv4-multicast-1" title="IPv4 Multicast">
+<t>
+<list style="symbols">
+<t><spanx style="verb">224.0.0.251</spanx>
+<list style="symbols">
+<t>HAM-64: <spanx style="verb">FBFB-0000-0000-0000</spanx></t>
+<t>EUI-48: <spanx style="verb">01:00:5e:00:00:01</spanx></t>
 </list></t>
 </list>
 </t>

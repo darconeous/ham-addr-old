@@ -7,7 +7,7 @@
     ipr = "none"
     keyword = ["Ham Address", "EUI-48", "EUI-64", "Link Local", "Callsign", "Amateur Radio", "Ham Radio"]
 
-    date = 2021-02-02T00:00:00Z
+    date = 2021-06-23T00:00:00Z
 
     [pi]
     editing = "no"
